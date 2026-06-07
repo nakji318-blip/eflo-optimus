@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="/manifest_bot.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="現場AIBot">
+<meta name="theme-color" content="#00c6a2">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>EFLO FIELD AI — 現場支援Bot</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #0d0f14;
+  --bg2: #13161e;
+  --bg3: #1a1e28;
+  --surface: #20253200;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --accent: #00c6a2;
+  --accent2: #00e8bc;
+  --accent-dim: rgba(0,198,162,0.12);
+  --accent-dim2: rgba(0,198,162,0.06);
+  --amber: #f5a623;
+  --red: #ff4d6a;
+  --blue: #4a9eff;
+  --text: #e2e8f0;
+  --text2: #7a8599;
+  --text3: #3d4557;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Noto Sans JP', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== LAYOUT ===== */
+.app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.logo-area {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.logo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.logo-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.logo-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+
+.logo-sub {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+/* Site selector */
+.site-section {
+  padding: 14px 14px 8px;
+  flex-shrink: 0;
+}
+
+.section-label {
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.site-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 12px;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+}
+
+.site-btn:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.site-btn.active {
+  background: var(--accent-dim);
+  color: var(--accent2);
+  font-weight: 500;
+}
+
+.site-icon {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.05);
+}
+
+.site-btn.active .site-icon {
+  background: rgba(0,198,162,0.15);
+}
+
+.site-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.site-name { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.site-type { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.site-btn.active .site-type { color: rgba(0,198,162,0.6); }
+
+/* Quick actions */
+.quick-section {
+  padding: 14px 14px 8px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.quick-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 12px;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  text-align: left;
+}
+
+.quick-btn:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+
+.quick-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-red { background: var(--red); }
+.dot-amber { background: var(--amber); }
+.dot-blue { background: var(--blue); }
+.dot-green { background: var(--accent); }
+
+/* footer */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.manager-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.manager-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-dim2), var(--accent-dim));
+  border: 1px solid var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  color: var(--accent2);
+  flex-shrink: 0;
+}
+
+.manager-info { flex: 1; }
+.manager-name { font-size: 11px; font-weight: 500; color: var(--text); }
+.manager-role { font-size: 10px; color: var(--text3); }
+
+/* ===== MAIN CHAT ===== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Header */
+.chat-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: var(--bg2);
+}
+
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.site-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(0,198,162,0.2);
+}
+
+.indicator-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent2);
+}
+
+.indicator-text {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--accent2);
+}
+
+.chat-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.chat-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  font-size: 11px;
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.header-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Messages */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-behavior: smooth;
+}
+
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* System message */
+.msg-system {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px;
+  max-width: 680px;
+}
+
+.msg-system-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.msg-system-label {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.msg-system-text {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* User message */
+.msg-user {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.msg-user-bubble {
+  background: var(--accent-dim);
+  border: 1px solid rgba(0,198,162,0.2);
+  border-radius: 14px 14px 2px 14px;
+  padding: 10px 14px;
+  max-width: 70%;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* AI message */
+.msg-ai {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 760px;
+}
+
+.ai-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid rgba(0,198,162,0.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ai-avatar svg { width: 14px; height: 14px; }
+
+.ai-bubble {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 2px 14px 14px 14px;
+  padding: 12px 16px;
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.ai-bubble h4 {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent2);
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
+}
+
+.ai-bubble ol, .ai-bubble ul {
+  padding-left: 18px;
+  margin: 8px 0;
+}
+
+.ai-bubble li { margin-bottom: 4px; font-size: 13px; }
+
+.ai-ref {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text3);
+}
+
+.ai-ref span { color: var(--accent); }
+
+/* Tags */
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--mono);
+  font-weight: 500;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+.tag-danger { background: rgba(255,77,106,0.15); color: #ff4d6a; border: 1px solid rgba(255,77,106,0.2); }
+.tag-warn { background: rgba(245,166,35,0.15); color: #f5a623; border: 1px solid rgba(245,166,35,0.2); }
+.tag-info { background: rgba(0,198,162,0.12); color: var(--accent2); border: 1px solid rgba(0,198,162,0.2); }
+.tag-gray { background: rgba(255,255,255,0.05); color: var(--text2); border: 1px solid var(--border2); }
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 2px 14px 14px 14px;
+}
+
+.typing-dots span {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: bounce 1.2s ease-in-out infinite;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Suggested prompts */
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.suggest-btn {
+  padding: 5px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text2);
+  font-size: 11px;
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.suggest-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent2);
+  background: var(--accent-dim2);
+}
+
+/* ===== INPUT AREA ===== */
+.input-area {
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+  border-color: rgba(0,198,162,0.4);
+}
+
+.chat-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: none;
+  max-height: 100px;
+  min-height: 20px;
+}
+
+.chat-input::placeholder { color: var(--text3); }
+
+.send-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #000;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.send-btn:hover { background: var(--accent2); transform: scale(1.05); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.send-btn svg { width: 14px; height: 14px; }
+
+/* Input footer */
+.input-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.input-hint {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text3);
+}
+
+.char-count {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text3);
+}
+
+/* Alert Banner */
+.alert-banner {
+  margin: 0 20px;
+  padding: 8px 14px;
+  background: rgba(255,77,106,0.08);
+  border: 1px solid rgba(255,77,106,0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #ff4d6a;
+  font-family: var(--mono);
+  display: none;
+  flex-shrink: 0;
+}
+
+.alert-banner.show { display: flex; }
+
+/* Mobile toggle */
+.mobile-toggle {
+  display: none;
+  width: 36px; height: 36px;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    position: absolute;
+    left: -260px;
+    height: 100%;
+    z-index: 100;
+    transition: left 0.3s;
+  }
+  .sidebar.open { left: 0; }
+  .mobile-toggle { display: flex; }
+  .main { width: 100%; }
+}
+
+/* Animations */
+.msg-enter {
+  animation: msgIn 0.25s ease-out;
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.highlight-text { color: var(--accent2); font-weight: 500; }
+.warn-text { color: var(--amber); }
+.danger-text { color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="logo-area">
+      <div class="logo-badge">
+        <div class="logo-dot"></div>
+        <div class="logo-label">EFLO FIELD AI · TOOL-01</div>
+      </div>
+      <div class="logo-title">現場支援Bot</div>
+      <div class="logo-sub">株式会社イーフロ · 中島誠一 管理</div>
+    </div>
+
+    <div class="site-section">
+      <div class="section-label">現場を選択</div>
+      <button class="site-btn active" onclick="selectSite(this,'p4')" data-site="p4">
+        <div class="site-icon">P4</div>
+        <div class="site-info">
+          <div class="site-name">プロロジスパーク大阪4</div>
+          <div class="site-type">物流施設 · ザイマックス管理</div>
+        </div>
+      </button>
+      <button class="site-btn" onclick="selectSite(this,'p5')" data-site="p5">
+        <div class="site-icon">P5</div>
+        <div class="site-info">
+          <div class="site-name">プロロジスパーク大阪5</div>
+          <div class="site-type">物流施設 · 8カスタマー</div>
+        </div>
+      </button>
+      <button class="site-btn" onclick="selectSite(this,'lp')" data-site="lp">
+        <div class="site-icon">LP</div>
+        <div class="site-info">
+          <div class="site-name">ロジポート大阪ベイ</div>
+          <div class="site-type">大規模物流 · SECOM管理</div>
+        </div>
+      </button>
+      <button class="site-btn" onclick="selectSite(this,'ko')" data-site="ko">
+        <div class="site-icon">KO</div>
+        <div class="site-info">
+          <div class="site-name">コウノイケ物流センター</div>
+          <div class="site-type">送迎バス管理 · 夜勤対応</div>
+        </div>
+      </button>
+      <button class="site-btn" onclick="selectSite(this,'ss')" data-site="ss">
+        <div class="site-icon">SS</div>
+        <div class="site-info">
+          <div class="site-name">千趣会</div>
+          <div class="site-type">オフィスビル · PHS体制</div>
+        </div>
+      </button>
+      <button class="site-btn" onclick="selectSite(this,'ix')" data-site="ix">
+        <div class="site-icon">IX</div>
+        <div class="site-info">
+          <div class="site-name">インテックス大阪</div>
+          <div class="site-type">駐車場警備 · 3エリア</div>
+        </div>
+      </button>
+
+    </div>
+
+    <div class="quick-section">
+      <div class="section-label">緊急クイックアクセス</div>
+      <button class="quick-btn" onclick="quickAction('fire')">
+        <div class="quick-dot dot-red"></div>
+        火災警報 対応手順
+      </button>
+      <button class="quick-btn" onclick="quickAction('accident')">
+        <div class="quick-dot dot-amber"></div>
+        車両事故 初動対応
+      </button>
+      <button class="quick-btn" onclick="quickAction('found')">
+        <div class="quick-dot dot-blue"></div>
+        拾得物 処理手順
+      </button>
+      <button class="quick-btn" onclick="quickAction('handover')">
+        <div class="quick-dot dot-green"></div>
+        引き継ぎ 注意事項
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="manager-badge">
+        <div class="manager-avatar">誠</div>
+        <div class="manager-info">
+          <div class="manager-name">中島 誠一</div>
+          <div class="manager-role">管理責任者 · イーフロ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CHAT -->
+  <div class="main">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <button class="mobile-toggle" onclick="toggleSidebar()">
+          <svg viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="site-indicator">
+          <div class="indicator-dot"></div>
+          <div class="indicator-text" id="site-indicator">P4 · プロロジスパーク大阪4</div>
+        </div>
+        <div class="chat-title" id="chat-title">現場AIBot</div>
+      </div>
+      <div class="chat-header-right">
+        <button class="header-btn" onclick="clearChat()">会話をクリア</button>
+      </div>
+    </div>
+
+    <div class="alert-banner" id="alert-banner">
+      <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1L11 10H1L6 1Z" fill="currentColor"/><path d="M6 4v3M6 8.5v.5" stroke="#000" stroke-width="1" stroke-linecap="round"/></svg>
+      <span id="alert-text"></span>
+    </div>
+
+    <div class="messages" id="messages">
+      <!-- Initial welcome message injected by JS -->
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea
+          class="chat-input"
+          id="user-input"
+          placeholder="現場の状況・質問を入力してください..."
+          rows="1"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 14 14" fill="none">
+            <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-footer">
+        <span class="input-hint">Enter で送信 · Shift+Enter で改行</span>
+        <span class="char-count" id="char-count">0 / 500</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SITES = {
+  p4: {
+    label: 'P4 · プロロジスパーク大阪4',
+    name: 'プロロジスパーク大阪4',
+    manual: `
+【プロロジスパーク大阪4 マニュアル要約】
+管理会社：ザイマックス関西（渡邊氏・岡瀧氏）
+セキュリティ：ALSOK
+鍵管理：キーBOX①114本（41set）+ キーBOX②9本（6set）+ ゴミ庫鍵
+テナント数：18社（1F〜5F 南北館）
+警備体制：当務A・当務B・夜勤の3名体制
+
+【鍵管理の重要ルール】
+・鍵の貸出時は紐を付けて貸し出す
+・勤務交代時・設備退勤時に鍵の点検あり（声出し確認）
+・平日使用：管理室南側扉鍵・警備BOX
+・日曜・祝日使用：管理室南側扉鍵・消火ポンプ
+・No.11（警備詰所）No.41（管理室南入口）は当務Aが毎朝借りる
+
+【時系列の重要ポイント】
+・8:40 前当務者と引き継ぎ（日・祝日は警備員同士）
+・8:55 管理会社へ朝礼の声掛け（2〜3名在籍時）
+・9:00 立哨・警備業務（雨天・酷暑・寒波時は詰所内）
+・11:45 昼礼（平日のみ）
+・15:00〜16:00 トラック出口立哨
+・17:00 メインエントランス自動扉施錠（自動設定）
+・18:45 鍵No.11・41の返却・伴チェック
+・2:00〜6:00 仮眠
+
+【警報対応】
+・基本は設備（ザイマックス）へ指示を仰ぐ
+・火災警報：現場確認→本火災の場合 消防署＋所長に至急連絡
+・防排煙設備警報：現場確認→所長に連絡
+・停電・PCS警報：至急所長に連絡
+・防犯警報：現場確認→真報のみ所長に連絡、誤報は復旧操作
+・監視モニターダウン：①切替機確認 ②PC電源確認 ③サーバー確認
+
+【拾得物】
+・届出・巡回時に拾得した場合は拾得物預かり書を記入
+・現金・財布はザイマックスさんに必ず手渡す
+・落とし主に引き渡せた場合は書類のみ保管
+
+【巡回業務】
+・帽子着帽・白手袋着用
+・巡回は共用部のみ（テナントエリア内に入らない）
+・異常発見しても触れず基本目視確認
+・報告は設備（ザイマックス）へ
+・無断駐車対応：管理会社在所時は管理側が対応、不在時は貼り紙のみ
+
+【テナント主要情報】
+1F：スターバックスジャパン（ドライ8:15〜）、ファミリーマート（24時間）
+2F：LOGISTEED（8:00〜、夜間受付無し）
+3F：アスト西淀川（5:30〜、夜間17:00〜5:30は北側事務所）、オージーケーカブト
+4F：SBフレームワークス（土日祝休日、9:00〜15:00）、大和物流、ヒガシ21
+5F：ダイオーロジ、ニッポン・久留米運送、住友建機
+
+【引き継ぎノート】
+・当務者・夜勤者の名前を必ず明記すること（P4固有ルール）
+・次の日の勤務者が把握できる内容をすべて記入
+
+【補足業務】
+・8:30立哨→8:35管理室に戻り引き継ぎ→下番
+・感知器異常でも端末異常・蓄積警報レベルなら帰宅可
+・5階ラウンジ照明：不在時消灯・在所時点灯
+・売店エアコン：消さない（シール貼付箇所は触らない）
+    `
+  },
+  p5: {
+    label: 'P5 · プロロジスパーク大阪5',
+    name: 'プロロジスパーク大阪5',
+    manual: `
+【プロロジスパーク大阪5 マニュアル要約】
+管理会社：ザイマックス関西
+セキュリティ：ALSOK（ALSOKカードNo.3使用）
+鍵管理：全37本・カード全7枚（8:30・18:30に点検）
+カスタマー数：8社（1F〜4F）
+
+【時系列（当務24時間）】
+・8:30まで：鍵・カードチェック
+・8:30〜8:50：受付前立哨（出勤職員への挨拶）
+・9:00〜10:30：外周・建物巡回（ゴミ拾い・植栽確認）
+・10:30〜11:00：休憩
+・11:00〜11:55：警備BOX立哨（平日）
+・13:00〜14:00：昼食休憩（鍵はロッカーに置けばお出かけOK）
+・15:00〜16:00：建物巡回（共用部・中央車路）
+・18:00〜18:25：外周巡回（ゴミ拾い）
+・23:00〜24:00：建物巡回（清掃員控室施錠確認）
+・4:00頃：清掃員 足立さんへ鍵貸出
+・7:50：清掃員 立道さんへ鍵貸出（平日）
+・8:30：朝礼終了後に下番
+
+【カスタマー受付情報】
+4F-A：サンシャイン株式会社（電話後折返し 06-6613-4500、8:00〜19:30）
+4F-B：コイズミ物流（8:00〜22:00）
+4F-C：やまや商流（電話 06-6569-2511、23:00〜翌18:00）
+3F全：コイズミ物流（20番バース直接入庫、8:00〜21:00）
+2F全：楽天株式会社（倉庫直接対応、8:00〜20:00）
+1F-A：合通トラスコ（9:00以降は電話連絡、7:00〜21:00）
+1F-B：ダイキン（8:00〜19:00）
+1F-C：J・FAIR（事務所直接、6:00〜19:00）
+
+【受付心得】
+・服装で判断：スーツ→カスタマー事務所方面、作業着→バース方面
+・初めての来訪者は不安→安心させる会話が必要
+・徒歩は受付不要。車→来客駐車場1時間未満は来客簿必要
+・アポなし営業は入館を断ること
+・J.Fair（J.メイド）の職員には要注意
+
+【巡回ルール】
+・帽子着帽・手袋着用、夜間は懐中電灯携行
+・ザイマックス不在時：管理室施錠＋「離席中」案内板＋事業所携帯・ALSOKカードNo.3所持
+・夜間バースシャッター無人開放：①倉庫内無人確認 ②照明点灯確認→無人なら閉める
+・猫3匹が植栽コーナーに住み着き→敷地外に追い出す
+・カラス発見→手を叩き追い出す
+
+【大型車両待機場】
+・23:00巡回時に月極契約外の車両には0:00までの出庫要請
+・合通トラスコ月極：10t車2台・4t車4台
+・揉めるまで言わなくてよい。冷静沈着な対応で「次回からよろしく」
+
+【拾得物】
+・現金・財布はザイマックスに必ず手渡す
+・落とし主に引き渡せた場合は書類のみ保管
+
+【売店（心幸サービス）4階】
+・販売員出勤：月・木のみ
+・深夜3:00〜4:00は精算機メンテナンスのため使用禁止
+・故障時：06-4590-5287（8:30〜18:00）、時間外03-5305-3499
+
+【配線工事申請書】
+・作業終了後に「作業報告」の記入が必須
+・MDF・IDF配線は新規増設線を明記（撤退時に不明になるため）
+    `
+  },
+  lp: {
+    label: 'LP · ロジポート大阪ベイ',
+    name: 'ロジポート大阪ベイ',
+    manual: `
+【ロジポート大阪ベイ マニュアル要約】
+管理会社：ザイマックス関西（渡邊氏・岡瀧氏）
+セキュリティ：SECOM（TR II Web）
+ログイン：ユーザー名 admin / パスワード 756
+業務：24時間体制
+
+【SECOM操作手順】
+・ログイン：カーソル画面下部→eマーク右クリック→「TR II Web」→admin/756
+・自動扉開放：運用モード→マット有効→運用モード制御（決定ボタン）
+・自動扉施錠：運用モード→マット無効→運用モード制御（決定ボタン）
+・鉄扉強制解錠：扉名称（図面監視で選択）→強制解錠→運用モード制御
+・朝の交代前：SECOM・PCのアプリケーションを必ず再起動
+
+【南側自動扉 マット設定】
+・平日8:00〜17:30：マット有効（開放状態）
+・夜間・土日祝・ザイマックス休日：マット無効
+・17:30：南側マット無効設定
+
+【状況別SECOM操作】
+・コカコーラ対応：北側作業中のみ北側エントランスをマット有効（終了で元に戻す）
+・東芝EV点検：作業開始で北側マット有効（日曜・祝日は南北共にマット有効）
+・火災断定後：SECOM盤付き鉄扉が自動強制解除→現場または防災センターで復旧
+
+【時系列】
+・9:00〜10:30：外周・建物巡回（4階ラウンジ照明点灯）
+・15:25〜15:30：4階テラス扉施錠・ラミネート設置→休憩
+・16:50〜17:20：外周巡回（平日：ゴミ庫施錠）
+・22:30〜24:00：外周・建物巡回（4階ラウンジ照明消灯・エアコンOFF）
+・5:00〜6:00：建物巡回（4階エアコンON、平日：テラス扉解錠・ゴミ庫解錠）
+・月曜日AM5:00：会議室解錠（祝日の際は翌平日）
+
+【来館者対応】
+・ザイマックス・CRE・オーナー：受付簿不要、夜間は警備で自動扉を開ける
+・テナント来客：インターホンでテナント事務所に問い合わせ
+・Amazonワーカー（夜間売店利用）：施設側で開けない、暗証番号は教えない
+・夜間トラック運転手（売店のみ）：施設側で開けてOK
+・アポなし営業：当施設では禁止、退館させる
+
+【車両事故対応】
+・「念書」「手続きの流れ」をバインダーに挟んで現場に急行
+・惹起者の記入欄は当事者に記入してもらう
+・人身事故：救急処置および救急車対応
+・警察要請は当事者またはテナントが行う（施設側からは人身事故以外行わない）
+・旧式の簡易事故報告書は使用不可（2022年5月10日〜新規「念書」）
+
+【警察・捜査対応】
+・モニターカメラ閲覧依頼：閲覧は可能だが「捜査関係事項照会書」の提出を求める
+・名刺を頂くか所属・名前の確認をする
+・ザイマックス不在時：警察官の身分証・制服で確認し閲覧対応・写真撮影のみ承諾
+
+【巡回特記事項】
+・ゴミ庫暗証番号：4946
+・カラス対策：南北ランプの消火栓BOX内の拍子木で追い払う（9:00〜18:00頃）
+・Amazon軽バン無断駐車：ゼブラゾーン・上りランプ周りNG→「無断駐車禁止」案内用紙
+・22:30巡回：機械警備ありの箇所は目視のみ、Amazon・ヤマトは24時間開錠（触らない）
+
+【補足（2026年3月）】
+・ヤマト対応：平日8:00頃、カメラNo.27・28でMHC側・SBSエリア長時間駐車→移動要請
+・日通エリア（3階）発報：①地区音響一時停止 ②連動遮断 ③保守地区音響停止
+・喫煙問題：夜間Amazonワーカーの喫煙エリア外喫煙、2度注意後も守らなければ所属・名前確認・写真撮影
+
+【売店（心幸サービス）】
+・販売員出勤：月・水・金のみ
+・平日06-4950-5287、時間外・土日祝03-5305-3499
+    `
+  },
+  ko: {
+    label: 'KO · コウノイケ物流センター',
+    name: 'コウノイケ物流センター',
+    manual: `
+【コウノイケ物流センター マニュアル要約】
+業務時間帯：遅番（16:00〜）夜間継続
+送迎バス：マイクロバス2台・小型バス1台（計3台）
+
+【遅番 時系列】
+・16:00：遅番開始、来客者対応（車両）開始
+・毎時00分：北ゲートにて送迎バス出庫誘導（立哨）
+・毎時15分：送迎バス出庫（3台）→巡回+南側バイク置場タバコ吸殻確認
+・20:30：西九条発バス→コウノイケ着20:50（月〜金）
+・20:55〜21:00：南ゲート封鎖
+・21:00〜22:30：佐川急便トラック集荷（3〜5台）
+・21:15：送迎バス出庫後→閉鎖業務開始
+・AM4:00：開門
+
+【夜勤者 送迎バス時刻】
+21:15 / 22:15 / 23:15 / 24:00 / 1:00 / 2:00
+※土曜朝は市バス 中島2丁目発 7:33
+※翌日休日（土祝前）→中島公園出発 7:32（次は8:17）、徒歩約25分
+
+【北側 集荷車両案内】
+・輝和：No.1〜5
+・佐川急便：No.23〜33
+・ヤマト運輸：No.11（自社2tトラック、16:00〜19:00）
+
+【南側 集荷車両案内（2025年1月より変更）】
+・オカケン：旧トナミ側に変更（変更前：No.21〜23）
+・西濃運輸：旧トナミ側に変更（変更前：No.33〜35）
+・CS大阪テック：南側に変更（早朝より積込）
+
+【来客駐車スペース】
+・鴻池運輸関係者：来客スペースNo.1〜7
+・大塚商会（社員含む）：No.17〜20
+・入口で口頭案内後、必ず駐車確認をすること
+・ドライバーに作業担当者への確認を促すこと
+
+【禁煙・不審者対応】
+・駐車場内喫煙者を発見：会社名・名前・携帯番号を控えて鴻池事務所に連絡
+・南側バイク置場タバコ吸殻は毎時15分バス出庫後の巡回で確認
+
+【ゲート開閉】
+・21:15送迎バス出庫後→閉鎖業務開始
+・20:55〜21:00：南ゲート封鎖
+・AM4:00：開門
+    `
+  },
+  ss: {
+    label: 'SS · 千趣会',
+    name: '千趣会（大阪市北区同心1-6-23）',
+    manual: `
+【千趣会 マニュアル要約】
+所在地：大阪市北区同心1-6-23
+業務時間：7:30（上番）〜18:30（業務終了）
+緊急連絡：総務部 PHS=60322 / 岡本所長 PHS=61651
+
+【時系列】
+・7:30：上番
+・7:40：開館業務開始
+・8:10〜8:30：社員通用口で立哨（出勤挨拶）
+・8:30〜9:00：エントランス受付で立哨
+・9:00〜11:30：防災センターで出入管理業務
+・11:30〜12:00：休憩
+・12:00〜14:00：出入管理業務
+・14:00〜14:30：休憩
+・14:30〜16:30：出入管理業務
+・15:00〜15:30：貴重品運搬トラック対応
+・16:30〜17:00：休憩
+・17:00〜18:00：1階受付に移動・駐車場閉鎖
+・17:30以降：荷物受け取り不可
+・17:50：閉館準備
+・18:00〜18:15：新館5階・2階・1階 閉館業務
+・18:15：正面門扉施錠→エントランス自動ドア施錠
+・18:30：業務終了
+
+【開館手順（7:40〜8:00）14ステップ】
+①1階通用口の足元照明消灯 / 通用口照明消灯
+②最終退館者記入簿の回収
+③受付に臨時入退館記録表を設置
+④着替え→マスターキー・カードキー・PHSを装備
+⑤防災センター内の受付横 鉄扉を解錠
+⑥不在表→1階防災センター出入り口・社員用通用口の扉（外側）に掲示
+⑦1階ゴミ庫・車道側の扉を解錠（観音開き扉）
+⑧地下1階通路の照明を点灯 / 駐車場出入口シャッターを開放
+⑨1階受付の準備（電話機2台・iPad2台→カウンター上に設置・照明点灯）
+⑩2階ミーティングルーム（201〜204）扉を開放。夏季のみ扇風機2台ON
+⑪新館5階 休憩室ポット2台 水量チェック・補充
+⑫正面自動ドアを解錠（鍵解錠してからブレーカーをON）
+⑬8:00→正面門扉を解錠。不在表を回収→防災センターに戻る
+⑭ゴミ回収終了後→ゴミ庫・車道側の扉を施錠
+
+【閉館手順（18:00〜18:30）11ステップ】
+①マスターキー・カードキー・PHSを装備。不在表掲示。
+②臨時入退館記録表を回収→最終退館者記入簿を受付カウンターに置く
+③防災センター内・受付横の鉄扉を施錠
+④地下1階通路照明消灯 / 地下1階駐車場シャッター閉鎖（最長18:00まで）
+⑤受付カウンターの片付け（電話機・iPad→カウンター内に収納・照明消灯）
+⑥新館5階 休憩室ポット2台 水量チェック・補充
+⑦2階ミーティングルーム（未使用のみ）扉を閉める（施錠なし）。未使用会議室の換気扇・エアコン・照明の消灯確認
+⑧18:15 正面門扉施錠→エントランス自動ドア施錠（ブレーカーを落としてから）。閉鎖看板を設置
+⑨1階社員用通用口の足元照明を点灯（花壇内）。駐輪場門扉を施錠。
+⑩不在表回収。マスターキーを机に保管（施錠）。PHSの充電。警備日誌記入。卓上モニターOFF。防災室照明OFF。
+⑪金曜・祝日前のみ：「休業日出入り管理簿」を受付カウンターに置く
+
+【火災警報・誤報時の対応（8ステップ）】
+①防災表示盤から警報発報→「主音響停止」→「地区音響停止」
+②発報場所（何階・テナント名・設備機器名）を確認。必要な伴・カードを所持。
+③セコム営業所より確認の電話が管理室に入る（状況を伝える）
+④非常放送盤で全館放送「現地確認に向かうので次の放送に備えるよう」放送
+⑤現場にて火元・煙の有無を確認→防災センターに戻る（火元・煙なしの場合）
+⑥非常放送盤にて「火災なし（誤発報）」を全館放送
+⑦「復旧ボタン」→復旧しない場合は「一括連動移報停止」や「マスク対応」
+⑧現場対応中・対応終了で警備責任者に連絡→所長に連絡
+
+【電話対応（岡本所長不在時）】
+「お電話ありがとうございます。千趣会 防災センター 警備の◯◯です。」
+①相手先会社名・担当者名 ②連絡先・対象者の確認 ③要件の確認 ④メモで伝言
+
+【社用車4台（地下1階）】
+フリード白5529・フリード白5530・ノア白6879・クラウン黒1000
+※17:00〜19:00までに入庫でシャッター閉鎖。法人車両4台は在車・空車関係なく閉鎖可能
+    `
+  },
+  ix: {
+    label: 'IX · インテックス大阪',
+    name: 'インテックス大阪（屋上・第一・P4臨時駐車場）',
+    manual: `
+【インテックス大阪 駐車場警備 マニュアル】
+エリア：屋上駐車場・第一駐車場・P4臨時駐車場（3エリア）
+料金所：通常1箇所・混雑時2箇所（2レーン）
+特殊設備：事前精算機あり
+
+【屋上駐車場 車両フロー】
+入庫：スロープ登坂→右折→入庫レーン進入→駐車
+出庫：出庫→料金所で精算→出庫完了
+事前精算機：積極的に案内する
+
+【カラーコーン調整（入庫時）】
+①エントランスに近いブロックから駐車枠は埋まっていく
+②満車のブロック入り口をカラーコーンで仮・封鎖する（残り枠が少なくても随時）
+③封鎖しないと出口に車両が多数回り込み、案内・誘導の妨げになる
+
+【カラーコーン調整（出庫時）】
+①入庫導線の分岐ポイントから左右に出庫車両を分けて流す
+②全体の流れを2箇所の料金所に分岐させてスムーズに捌く
+③料金所に近いブロックから渋滞が始まりやすい→ブロック入り口を封鎖して大回りルートへ誘導
+
+【身障者スペース運用】
+①通常はカラーコーンで駐車不可状態にしておく
+②身障者の方から申請があった後にコーンを外し駐車案内
+③満車になったら2号ゲートに無線で報告（バーゲン系は即座に埋まる）
+④2号ゲートから問い合わせ無線→「駐車枠に空きが出来たらお知らせします」と応答
+⑤空きが出来たら即座に2号ゲートへ無線報告
+
+【禁止事項（厳守）】
+・料金所・ポール内の横断は絶対禁止
+・理由：センサーがある為、ポールに当たると破損の恐れがある
+・ポジションに戻る際・休憩に行く際は料金所の裏側を回ること
+
+【標準案内文言（6種）】
+①「エントランスは、中央のガラス扉の所に在ります。」
+②「身障者枠には、限りがあるので満車の場合は出来るだけエントランスに近い箇所を、ご自身でお探しになり駐車して下さい。」
+③「身障者割引に関しては、エントランスを入られた管理室前に専用の機械が在りますので、そちらで対応願います。」
+④「出口での料金徴収になります。」
+⑤「出庫ラッシュ時は、各列の最後尾へ　お並び下さい。」
+⑥「事前精算機もご用意しておりますので、宜しければご利用下さい。」
+
+【P4臨時駐車場】
+・メイン駐車場満車時に開放するオーバーフロー対応
+・出入口1箇所（料金所あり）。入庫はUターン動線
+・歩行者通路：左側（西側）に独立
+・警備車両：右側（東側）縦配置
+    `
+  }
+};
+
+let currentSite = 'p4';
+let isProcessing = false;
+let conversationHistory = [];
+
+const SYSTEM_PROMPT_BASE = `あなたは株式会社イーフロの現場警備員向けAI支援システム「EFLO FIELD AI」です。
+管理責任者：中島誠一（株式会社イーフロ）
+
+以下の厳格なルールに従って回答してください：
+
+【回答ルール】
+1. 手順は必ず「①②③」の番号リスト形式で出力する
+2. 緊急・安全・火災・人身事故に関する事項は必ず回答の最初に配置する
+3. 連絡先が必要な事案には必ず連絡先を含める
+4. マニュアルに記載がない内容は「管理者（中島誠一）に確認してください」と明示する
+5. 回答の最後に必ず「【参照マニュアル】現場名 · 該当セクション」を記載する
+6. 5W1H（いつ・どこで・誰が・何を・なぜ・どの様に）を意識した簡潔な回答をする
+7. 人身事故の場合は「救急連絡（119）」を必ず最優先ステップとして先頭に出す
+8. 日本語で回答すること
+
+【現場マニュアルデータ】
+{SITE_MANUAL}`;
+
+function buildSystemPrompt(siteKey) {
+  const site = SITES[siteKey];
+  if (!site) return SYSTEM_PROMPT_BASE.replace('{SITE_MANUAL}', '現場情報が見つかりません。');
+  return SYSTEM_PROMPT_BASE.replace('{SITE_MANUAL}', site.manual);
+}
+
+async function callClaude(userMessage) {
+  const systemPrompt = buildSystemPrompt(currentSite);
+  conversationHistory.push({ role: 'user', content: userMessage });
+
+  const response = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: conversationHistory
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API Error ${response.status}`);
+  }
+
+  const data = await response.json();
+  const assistantMessage = data.content?.[0]?.text || '';
+  conversationHistory.push({ role: 'assistant', content: assistantMessage });
+  return assistantMessage;
+}
+
+function renderMarkdown(text) {
+  return text
+    .replace(/【(.+?)】/g, '<h4>$1</h4>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^①|^②|^③|^④|^⑤|^⑥|^⑦|^⑧/gm, m => `<li style="list-style:none;padding-left:0">${m}`)
+    .replace(/^・(.+)$/gm, '<li>$1</li>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/（(.+?)）/g, '<span style="color:var(--text2)">（$1）</span>');
+}
+
+function addMessage(type, content, site) {
+  const msgs = document.getElementById('messages');
+
+  if (type === 'system') {
+    const div = document.createElement('div');
+    div.className = 'msg-system msg-enter';
+    div.innerHTML = `
+      <div class="msg-system-header">
+        <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="var(--accent)" stroke-width="1"/><circle cx="5" cy="5" r="1.5" fill="var(--accent)"/></svg>
+        <span class="msg-system-label">SYSTEM</span>
+      </div>
+      <div class="msg-system-text">${content}</div>
+    `;
+    msgs.appendChild(div);
+  } else if (type === 'user') {
+    const div = document.createElement('div');
+    div.className = 'msg-user msg-enter';
+    div.innerHTML = `<div class="msg-user-bubble">${content}</div>`;
+    msgs.appendChild(div);
+  } else if (type === 'ai') {
+    const div = document.createElement('div');
+    div.className = 'msg-ai msg-enter';
+    div.innerHTML = `
+      <div class="ai-avatar">
+        <svg viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="5.5" stroke="var(--accent2)" stroke-width="1"/>
+          <path d="M4 7h6M7 4v6" stroke="var(--accent2)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="ai-bubble">${content}</div>
+    `;
+    msgs.appendChild(div);
+  } else if (type === 'typing') {
+    const div = document.createElement('div');
+    div.className = 'typing-indicator msg-enter';
+    div.id = 'typing-indicator';
+    div.innerHTML = `
+      <div class="ai-avatar">
+        <svg viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="5.5" stroke="var(--accent2)" stroke-width="1"/>
+          <path d="M4 7h6M7 4v6" stroke="var(--accent2)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="typing-dots">
+        <span></span><span></span><span></span>
+      </div>
+    `;
+    msgs.appendChild(div);
+  }
+
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text || isProcessing) return;
+
+  isProcessing = true;
+  document.getElementById('send-btn').disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('char-count').textContent = '0 / 500';
+
+  addMessage('user', escapeHtml(text));
+  addMessage('typing');
+
+  try {
+    const response = await callClaude(text);
+    removeTyping();
+
+    const formatted = formatAIResponse(response);
+    addMessage('ai', formatted);
+  } catch (err) {
+    removeTyping();
+    let errMsg = '';
+    if (err.message.includes('401') || err.message.includes('403')) {
+      errMsg = '⚠️ APIキー認証エラー：proxy_server.pyのAPIキーを確認してください。';
+    } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('fetch')) {
+      errMsg = '⚠️ サーバーが起動していません。<br>ターミナルで以下を実行してください：<br><br><code style="background:rgba(0,0,0,.2);padding:4px 8px;border-radius:4px;font-size:11px">cd ~/Downloads/eflo_app && python3 proxy_server.py</code>';
+    } else {
+      errMsg = `⚠️ エラー：${err.message}`;
+    }
+    addMessage('ai', `<span style="color:var(--red)">${errMsg}</span>`);
+
+    const demo = getDemoResponse(text, currentSite);
+    if (demo) {
+      setTimeout(() => addMessage('ai', formatAIResponse(demo)), 800);
+    }
+  }
+
+  isProcessing = false;
+  document.getElementById('send-btn').disabled = false;
+  document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+
+function formatAIResponse(text) {
+  let html = escapeHtml(text);
+  html = html.replace(/【(.+?)】/g, '<h4>$1</h4>');
+  html = html.replace(/\n/g, '<br>');
+  html = html.replace(/（注意）|（重要）|（緊急）/g, '<span class="tag tag-danger">$&</span>');
+  html = html.replace(/（確認）|（要確認）/g, '<span class="tag tag-warn">$&</span>');
+
+  const refMatch = text.match(/【参照マニュアル】.+/);
+  if (refMatch) {
+    const refText = escapeHtml(refMatch[0]);
+    html = html.replace(escapeHtml(refMatch[0]), `<div class="ai-ref"><span>${refText}</span></div>`);
+  }
+
+  return html;
+}
+
+function getDemoResponse(question, site) {
+  const q = question.toLowerCase();
+  const demos = {
+    p4: {
+      '拾得物': `【拾得物の対応手順（P4）】\n①拾得物を発見したら、拾得物預かり書に記入し落とし物入れに保管する\n②現金・財布の落とし物は、用紙に記入後ザイマックスさんに必ず手渡すこと\n③落とし主に引き渡しできた場合は書類のみ保管する\n④警察届出後は「拾得物預かり書」がファイルに挟まれる\n\n【参照マニュアル】プロロジスパーク大阪4 · 拾得物管理`,
+      '火災': `【火災警報 対応手順（P4）】\n①基本は設備（ザイマックス）へ指示を仰ぐ\n②現場を確認し、本火災の場合は至急 消防署＋所長に連絡する\n③誤報の場合は所長に連絡する\n④防排煙設備警報の場合も現場確認→所長に連絡\n\n（注意）主音響停止を先に止めること\n\n【参照マニュアル】プロロジスパーク大阪4 · 警報対応`,
+      '鍵': `【鍵管理の手順（P4）】\n①平日当務A：8:40分に鍵No.11（警備詰所）・No.41（管理室南入口）を借りる\n②鍵の貸出時は紐を付けて貸し出すこと\n③勤務交代時・設備退勤時に鍵の点検を行う（声出し確認）\n④18:45に鍵No.11・41を返却し、管理会社と伴チェックを行う\n\nキーBOX①：計41set 114本保管\nキーBOX②：計6set 9本・ゴミ庫鍵1本保管\n\n【参照マニュアル】プロロジスパーク大阪4 · 鍵管理`
+    },
+    lp: {
+      '事故': `【車両事故 初動対応（ロジポート）】\n①（重要）人身事故の場合は救急処置および救急車対応（119）を最優先\n②「念書」「手続きの流れ」をバインダーに挟んで現場に急行する\n③惹起者の記入欄は当事者に記入してもらう\n④事故現場の写真を携帯で撮影する\n⑤警察要請は当事者またはテナントが行う（施設側は人身事故以外行わない）\n⑥物損事故：建物・車両の被害確認→カラーコーンで囲い、破片を移動回収\n\n（注意）旧式の簡易事故報告書は使用不可（2022年5月10日〜新規「念書」を使用）\n\n【参照マニュアル】ロジポート大阪ベイ · 車両事故対応`,
+      'secom': `【SECOM操作手順（ロジポート）】\n①カーソルを画面下部→eマークを右クリック\n②「TR II Web」をクリック\n③ログインID：admin ／ パスワード：756\n④監視系→入退室監視→通常画面→扉状態一覧の南エントランスをクリック\n⑤遠隔制御（決定ボタン）＝扉→瞬間開錠\n\n自動扉開放：運用モード→マット有効→運用モード制御\n自動扉施錠：運用モード→マット無効→運用モード制御\n\n（注意）朝の交代前にSECOM・PCのアプリケーションを必ず再起動すること\n\n【参照マニュアル】ロジポート大阪ベイ · SECOM操作`
+    },
+    ss: {
+      '開館': `【開館手順（千趣会）全14ステップ】\n①1階通用口の足元照明・通用口照明を消灯\n②最終退館者記入簿の回収\n③受付に臨時入退館記録表を設置\n④着替え→マスターキー・カードキー・PHSを装備\n⑤防災センター内の受付横 鉄扉を解錠\n⑥不在表を1階防災センター出入り口・社員用通用口に掲示\n⑦1階ゴミ庫・車道側の扉を解錠（観音開き扉）\n⑧地下1階通路の照明を点灯 / 駐車場シャッターを開放\n⑨1階受付の準備（電話機2台・iPad2台→カウンター上に設置・照明点灯）\n⑩2階ミーティングルーム（201〜204）扉を開放\n⑪新館5階 休憩室ポット2台 水量チェック・補充\n⑫正面自動ドアを解錠（鍵解錠してからブレーカーをON）\n⑬8:00 正面門扉を解錠。不在表を回収。\n⑭ゴミ回収終了後→ゴミ庫・車道側の扉を施錠\n\n【参照マニュアル】千趣会 · 開館手順`
+    }
+  };
+  const siteDemo = demos[site] || {};
+  for (const [key, val] of Object.entries(siteDemo)) {
+    if (q.includes(key)) return val;
+  }
+  return null;
+}
+
+function selectSite(btn, siteKey) {
+  document.querySelectorAll('.site-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentSite = siteKey;
+  conversationHistory = [];
+
+  const site = SITES[siteKey];
+  document.getElementById('site-indicator').textContent = site.label;
+
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+  showWelcome(siteKey);
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function showWelcome(siteKey) {
+  const site = SITES[siteKey];
+  const suggestions = getSuggestions(siteKey);
+
+  addMessage('system', `
+    現場を <strong style="color:var(--accent2)">${site.name}</strong> に切り替えました。<br>
+    このAIは ${site.name} のマニュアルデータを参照して回答します。<br>
+    業務中に発生した事案・手順確認・緊急対応など、何でも日本語でお聞きください。
+    <div class="suggestions" style="margin-top:10px">
+      ${suggestions.map(s => `<button class="suggest-btn" onclick="useSuggestion('${s}')">${s}</button>`).join('')}
+    </div>
+  `);
+}
+
+function getSuggestions(siteKey) {
+  const map = {
+    p4: ['拾得物があった時の手順は？', '火災警報が鳴った時の対応は？', '鍵の引き継ぎ手順を教えて', 'テナント受付時間を教えて'],
+    p5: ['カスタマーへの案内方法は？', '大型車両の夜間対応は？', '猫を発見した時は？', '清掃員の鍵貸し出しは何時？'],
+    lp: ['SECOMの操作方法は？', '車両事故が起きた時の手順は？', '南側自動扉の設定方法は？', 'カラス対策はどうするの？'],
+    ko: ['バス出庫の手順は？', '集荷業者の案内場所は？', 'ゲート閉鎖の時間は？'],
+    ss: ['開館手順を全部教えて', '閉館手順を教えて', '火災誤報の対応手順は？', '電話対応の文言は？'],
+    ix: ['コーンの調整方法は？', '身障者スペースの管理は？', '料金所の横断は？', '案内文言を教えて']
+  };
+  return map[siteKey] || [];
+}
+
+function useSuggestion(text) {
+  document.getElementById('user-input').value = text;
+  sendMessage();
+}
+
+function quickAction(type) {
+  const actions = {
+    fire: '火災警報が発報しました。今すぐの対応手順を教えてください。',
+    accident: '車両事故が発生しました。初動対応の手順を教えてください。',
+    found: '拾得物（財布）を発見しました。処理手順を教えてください。',
+    handover: '引き継ぎの際に注意すべき事項を教えてください。'
+  };
+  document.getElementById('user-input').value = actions[type] || '';
+  sendMessage();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  const len = el.value.length;
+  document.getElementById('char-count').textContent = `${len} / 500`;
+  if (len > 450) {
+    document.getElementById('char-count').style.color = 'var(--amber)';
+  } else {
+    document.getElementById('char-count').style.color = 'var(--text3)';
+  }
+}
+
+function clearChat() {
+  conversationHistory = [];
+  document.getElementById('messages').innerHTML = '';
+  showWelcome(currentSite);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// Init
+showWelcome('p4');
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW登録完了:', r.scope))
+      .catch(e => console.log('SW登録失敗:', e));
+  });
+}
+</script>
+</body>
+</html>
