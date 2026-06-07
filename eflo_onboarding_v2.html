@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="/manifest_school.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="警備学校">
+<meta name="theme-color" content="#b83228">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>EFLO GUARD SCHOOL v2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#18150f;--ink2:#3d3830;--ink3:#7a7268;--ink4:#b8b2a8;
+  --paper:#faf8f3;--paper2:#f2efe8;--paper3:#e8e4db;
+  --red:#b83228;--red2:#d44438;--red-bg:#fdf0ee;--red-border:#f0c8c2;
+  --teal:#1a6858;--teal2:#2a8870;--teal-bg:#eaf5f2;--teal-border:#b8ddd8;
+  --gold:#8a6420;--gold2:#b07c28;--gold-bg:#fdf6e8;--gold-border:#e8d4a0;
+  --blue:#1a4870;--blue2:#2a62a0;--blue-bg:#eaf0f8;--blue-border:#b8ccec;
+  --border:rgba(24,21,15,.1);--border2:rgba(24,21,15,.18);
+  --shadow:0 1px 4px rgba(24,21,15,.08);
+  --shadow2:0 4px 20px rgba(24,21,15,.12);
+  --r:10px;--r2:16px;
+  --font-head:'Noto Serif JP',serif;
+  --font-body:'Zen Kaku Gothic New',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ════════════════════════════
+   WELCOME SCREEN
+════════════════════════════ */
+#scr-welcome{
+  background:var(--ink);
+  align-items:center;justify-content:center;
+  padding:40px 24px;text-align:center;
+  position:relative;overflow:hidden;
+}
+#scr-welcome::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(180,80,50,.15),transparent);
+  pointer-events:none;
+}
+.w-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.15);
+  margin-bottom:28px;
+}
+.w-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--red2)}
+.w-badge-txt{font-size:10px;font-family:var(--font-mono);color:rgba(255,255,255,.5);letter-spacing:.12em;text-transform:uppercase}
+.w-logo{
+  font-family:var(--font-head);font-weight:900;font-size:52px;
+  color:#fff;line-height:1;margin-bottom:6px;letter-spacing:-.03em;
+}
+.w-logo span{color:var(--red2)}
+.w-tagline{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:44px;line-height:1.9}
+.w-form{width:100%;max-width:400px;text-align:left}
+.w-label{display:block;font-size:10px;font-family:var(--font-mono);color:rgba(255,255,255,.4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.w-input,.w-select{
+  width:100%;padding:11px 14px;margin-bottom:14px;
+  border:1px solid rgba(255,255,255,.15);border-radius:var(--r);
+  background:rgba(255,255,255,.06);color:#fff;
+  font-family:var(--font-body);font-size:14px;outline:none;
+  transition:border-color .2s;appearance:none;
+}
+.w-input::placeholder{color:rgba(255,255,255,.25)}
+.w-input:focus,.w-select:focus{border-color:var(--red2)}
+.w-select option{background:#2a2520;color:#fff}
+.w-select-wrap{position:relative;margin-bottom:14px}
+.w-select-wrap .w-select{margin-bottom:0}
+.w-select-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.4);font-size:12px;pointer-events:none}
+.w-btn{
+  width:100%;padding:15px;margin-top:6px;
+  border:none;border-radius:var(--r);
+  background:var(--red2);color:#fff;
+  font-family:var(--font-body);font-size:15px;font-weight:700;
+  cursor:pointer;transition:all .2s;letter-spacing:.02em;
+}
+.w-btn:hover{background:var(--red);transform:translateY(-1px);box-shadow:0 4px 20px rgba(212,68,56,.4)}
+.w-footer{margin-top:32px;font-size:10px;color:rgba(255,255,255,.2);font-family:var(--font-mono)}
+
+/* ════════════════════════════
+   APP SCREEN
+════════════════════════════ */
+#scr-app{background:var(--paper2)}
+
+/* Top bar */
+.top-bar{
+  background:var(--paper);border-bottom:1px solid var(--border);
+  padding:10px 16px;display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;position:sticky;top:0;z-index:50;
+}
+.top-logo{font-family:var(--font-head);font-weight:900;font-size:15px;color:var(--ink)}
+.top-logo span{color:var(--red2)}
+.top-right{display:flex;align-items:center;gap:8px}
+.top-site{padding:3px 10px;border-radius:6px;background:var(--red-bg);border:1px solid var(--red-border);font-size:11px;font-family:var(--font-mono);color:var(--red)}
+.top-user{font-size:12px;font-weight:500;color:var(--ink2)}
+.top-progress{
+  width:30px;height:30px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-family:var(--font-mono);color:var(--teal);font-weight:700;
+  background:var(--teal-bg);border:1.5px solid var(--teal-border);
+  border-radius:50%;
+}
+
+/* Step pills */
+.steps-wrap{
+  background:var(--paper);border-bottom:1px solid var(--border);
+  padding:10px 12px;display:flex;gap:4px;overflow-x:auto;
+}
+.steps-wrap::-webkit-scrollbar{display:none}
+.pill{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:20px;
+  border:1.5px solid var(--border2);
+  font-size:11px;font-family:var(--font-mono);color:var(--ink3);
+  cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;
+  background:transparent;
+}
+.pill:hover{border-color:var(--red);color:var(--red)}
+.pill.active{border-color:var(--red);background:var(--red-bg);color:var(--red);font-weight:700}
+.pill.done{border-color:var(--teal);background:var(--teal-bg);color:var(--teal)}
+.pill-n{
+  width:16px;height:16px;border-radius:50%;
+  background:currentColor;display:flex;align-items:center;justify-content:center;
+  font-size:9px;flex-shrink:0;
+}
+.pill-ni{color:var(--paper)}
+.pill.done .pill-n::after{content:'✓';font-size:9px;color:var(--paper)}
+.pill.done .pill-ni{display:none}
+
+/* Content */
+.content{flex:1;padding:18px 16px;max-width:680px;margin:0 auto;width:100%}
+
+/* Cards */
+.card{
+  background:var(--paper);border:1px solid var(--border);
+  border-radius:var(--r2);padding:18px 20px;margin-bottom:12px;
+  box-shadow:var(--shadow);
+}
+.card.new{border-color:var(--red-border);border-width:1.5px}
+.c-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:14px;padding-bottom:12px;
+  border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;
+}
+.c-title{font-family:var(--font-head);font-size:17px;font-weight:700;color:var(--ink);line-height:1.3}
+.tag{padding:2px 8px;border-radius:4px;font-size:10px;font-family:var(--font-mono);font-weight:700;flex-shrink:0}
+.tag-r{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.tag-t{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-border)}
+.tag-g{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border)}
+.tag-b{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.tag-n{background:var(--paper3);color:var(--ink3);border:1px solid var(--border2)}
+
+/* Section display */
+.sec{display:none;animation:fadeUp .3s ease}
+.sec.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Rule items */
+.rule{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.rule:last-child{border-bottom:none}
+.rule-n{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  background:var(--red);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-size:14px;font-weight:900;
+}
+.rule-body{flex:1}
+.rule-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.rule-desc{font-size:12px;color:var(--ink2);line-height:1.65}
+.rule-note{font-size:11px;color:var(--ink3);margin-top:4px;font-style:italic;padding-left:8px;border-left:2px solid var(--paper3)}
+
+/* Timeline */
+.tl-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.tl-item:last-child{border-bottom:none}
+.tl-time{width:50px;flex-shrink:0;font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--red);padding-top:1px;text-align:right}
+.tl-dot{
+  width:10px;height:10px;border-radius:50%;
+  border:2px solid var(--red);background:var(--paper);
+  flex-shrink:0;margin-top:4px;
+}
+.tl-dot.u{background:var(--red)}
+.tl-body{flex:1}
+.tl-act{font-size:13px;font-weight:500;color:var(--ink)}
+.tl-det{font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.5}
+
+/* Alert boxes */
+.alert{border-radius:var(--r);padding:9px 12px;margin-bottom:10px;font-size:12px;line-height:1.6}
+.alert-w{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold2)}
+.alert-r{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);font-weight:500}
+.alert-t{background:var(--teal-bg);border:1px solid var(--teal-border);color:var(--teal2)}
+
+/* Steps */
+.step{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-n{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;font-family:var(--font-mono);
+  background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);
+}
+.step-n.r{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.step-n.t{background:var(--teal-bg);color:var(--teal);border-color:var(--teal-border)}
+.step-b{flex:1;font-size:12px;color:var(--ink);line-height:1.5}
+.step-s{font-size:11px;color:var(--ink3);margin-top:2px}
+
+/* Quiz */
+.q-bar-wrap{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.q-bar{flex:1;height:5px;background:var(--paper3);border-radius:3px;overflow:hidden}
+.q-bar-fill{height:100%;background:var(--gold2);border-radius:3px;transition:width .4s ease}
+.q-count{font-size:11px;font-family:var(--font-mono);color:var(--ink3);flex-shrink:0}
+.q-box{background:var(--paper2);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.q-text{font-size:14px;font-weight:500;color:var(--ink);line-height:1.65;margin-bottom:14px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-radius:var(--r);
+  border:1.5px solid var(--border2);background:var(--paper);
+  color:var(--ink);cursor:pointer;font-family:var(--font-body);font-size:13px;
+  text-align:left;transition:all .2s;width:100%;
+}
+.opt:hover:not(:disabled){border-color:var(--gold2);background:var(--gold-bg)}
+.opt.ok{border-color:var(--teal)!important;background:var(--teal-bg)!important;color:var(--teal)}
+.opt.ng{border-color:var(--red)!important;background:var(--red-bg)!important;color:var(--red)}
+.opt-k{
+  width:22px;height:22px;border-radius:5px;flex-shrink:0;
+  background:var(--paper3);color:var(--ink3);
+  font-size:10px;font-family:var(--font-mono);font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.opt.ok .opt-k{background:var(--teal);color:#fff}
+.opt.ng .opt-k{background:var(--red);color:#fff}
+.q-fb{border-radius:var(--r);padding:10px 14px;font-size:12px;line-height:1.6;margin-top:8px;display:none}
+.q-fb.show{display:block}
+.q-fb.ok{background:var(--teal-bg);border:1px solid var(--teal-border);color:var(--teal2)}
+.q-fb.ng{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.q-next{
+  width:100%;padding:12px;border-radius:var(--r);border:none;
+  background:var(--gold2);color:#fff;font-family:var(--font-body);
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;
+  display:none;margin-top:10px;
+}
+.q-next.show{display:block}
+.q-next:hover{background:var(--gold)}
+
+/* Score result */
+.score-wrap{text-align:center;padding:24px 0;display:none}
+.score-wrap.show{display:block}
+.score-ring{
+  width:100px;height:100px;border-radius:50%;
+  border:5px solid var(--red2);background:var(--red-bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:0 auto 16px;
+}
+.score-num{font-family:var(--font-head);font-size:30px;font-weight:900;color:var(--red2);line-height:1}
+.score-of{font-size:10px;font-family:var(--font-mono);color:var(--ink3)}
+.score-msg{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.score-sub{font-size:12px;color:var(--ink3);margin-bottom:18px}
+
+/* Q&A accordion */
+.qa-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:8px}
+.qa-q{
+  display:flex;align-items:center;gap:10px;padding:12px 14px;
+  cursor:pointer;background:var(--paper2);
+  font-size:13px;font-weight:500;color:var(--ink);transition:background .15s;
+}
+.qa-q:hover{background:var(--paper3)}
+.qa-icon{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  background:var(--teal-bg);border:1.5px solid var(--teal-border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-family:var(--font-mono);font-weight:900;color:var(--teal);
+}
+.qa-chevron{margin-left:auto;flex-shrink:0;color:var(--ink4);transition:transform .2s}
+.qa-item.open .qa-chevron{transform:rotate(180deg)}
+.qa-a{
+  display:none;padding:12px 14px;background:var(--paper);
+  border-top:1px solid var(--border);font-size:12px;color:var(--ink2);line-height:1.75;
+}
+.qa-item.open .qa-a{display:block}
+
+/* Contacts */
+.contact{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.contact:last-child{border-bottom:none}
+.c-av{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-size:14px;font-weight:900;
+}
+.av-r{background:var(--red-bg);color:var(--red)}
+.av-t{background:var(--teal-bg);color:var(--teal)}
+.av-b{background:var(--blue-bg);color:var(--blue)}
+.av-g{background:var(--paper3);color:var(--ink2)}
+.c-info{flex:1}
+.c-name{font-size:13px;font-weight:500;color:var(--ink)}
+.c-role{font-size:11px;color:var(--ink3)}
+.c-how{
+  font-size:11px;font-family:var(--font-mono);
+  padding:3px 8px;border-radius:5px;background:var(--paper3);
+  color:var(--ink2);border:1px solid var(--border2);white-space:nowrap;
+}
+
+/* Action row */
+.act-row{display:flex;gap:8px;margin-top:16px}
+.btn{
+  flex:1;padding:11px 16px;border-radius:var(--r);
+  border:1.5px solid var(--border2);background:var(--paper);
+  color:var(--ink);font-family:var(--font-body);font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .2s;
+}
+.btn:hover{border-color:var(--red);color:var(--red)}
+.btn-p{background:var(--red2);border-color:var(--red2);color:#fff}
+.btn-p:hover{background:var(--red);border-color:var(--red);color:#fff}
+.btn-t{background:var(--teal2);border-color:var(--teal2);color:#fff}
+.btn-t:hover{background:var(--teal);border-color:var(--teal);color:#fff}
+
+/* Completion */
+.done-banner{
+  background:var(--teal2);color:#fff;padding:20px 22px;
+  border-radius:var(--r2);text-align:center;margin-bottom:14px;
+  display:none;animation:fadeUp .4s ease;
+}
+.done-banner.show{display:block}
+.done-stamp{
+  width:60px;height:60px;border-radius:50%;
+  border:3px solid rgba(255,255,255,.5);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;
+  font-family:var(--font-head);font-size:24px;font-weight:900;
+  color:#fff;transform:rotate(-8deg);
+}
+.done-title{font-family:var(--font-head);font-size:20px;font-weight:900;margin-bottom:4px}
+.done-sub{font-size:12px;opacity:.85;margin-bottom:14px}
+
+/* AI loading */
+.ai-load{text-align:center;padding:40px 20px;color:var(--ink3);font-size:13px}
+.ai-load-icon{font-size:28px;margin-bottom:12px;display:block;animation:rot 2s linear infinite;opacity:.4}
+@keyframes rot{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* New tag inline */
+.inline-new{
+  display:inline-block;vertical-align:middle;
+  padding:0px 5px;border-radius:3px;font-size:9px;
+  font-family:var(--font-mono);font-weight:700;
+  background:var(--red-bg);color:var(--red);
+  border:0.5px solid var(--red-border);margin-left:5px;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     WELCOME SCREEN
+══════════════════════════════════ -->
+<div class="screen active" id="scr-welcome">
+  <div class="w-badge">
+    <div class="w-badge-dot"></div>
+    <div class="w-badge-txt">EFLO GUARD SCHOOL · TOOL-05 · v2.0</div>
+  </div>
+
+  <div class="w-logo">警備<span>学校</span></div>
+  <div class="w-tagline">株式会社イーフロ 新人隊員向け<br>配属現場マニュアル学習システム<br>
+    <span style="font-size:11px;opacity:.5">P4・P5 最新マニュアルv2.0 完全統合版</span>
+  </div>
+
+  <div class="w-form">
+    <label class="w-label">お名前</label>
+    <input class="w-input" id="in-name" type="text" placeholder="例：田中 一郎">
+
+    <label class="w-label">配属現場</label>
+    <div class="w-select-wrap">
+      <select class="w-select" id="in-site">
+        <option value="">現場を選択してください</option>
+        <option value="p4">プロロジスパーク大阪4（物流施設）</option>
+        <option value="p5">プロロジスパーク大阪5（物流施設）</option>
+        <option value="lp">ロジポート大阪ベイ（大規模物流）</option>
+        <option value="ko">コウノイケ物流センター（物流）</option>
+        <option value="ss">千趣会（オフィスビル）</option>
+        <option value="ix">インテックス大阪（駐車場）</option>
+      </select>
+    </div>
+
+    <label class="w-label">勤務区分</label>
+    <div class="w-select-wrap">
+      <select class="w-select" id="in-shift">
+        <option value="当務">当務（日中〜翌朝）</option>
+        <option value="夜勤">夜勤（夜間〜翌朝）</option>
+        <option value="遅番">遅番（夕方〜夜間）</option>
+      </select>
+    </div>
+
+    <label class="w-label">経験レベル</label>
+    <div class="w-select-wrap">
+      <select class="w-select" id="in-exp">
+        <option value="新人">未経験・入社1年未満</option>
+        <option value="中堅">1〜3年</option>
+        <option value="ベテラン">3年以上</option>
+      </select>
+    </div>
+
+    <button class="w-btn" onclick="startApp()">学習をはじめる →</button>
+  </div>
+
+  <div class="w-footer">管理責任者：中島 誠一 ／ 株式会社イーフロ ／ v2.0</div>
+</div>
+
+<!-- ══════════════════════════════════
+     APP SCREEN
+══════════════════════════════════ -->
+<div class="screen" id="scr-app">
+
+  <div class="top-bar">
+    <div class="top-logo">警備<span>学校</span></div>
+    <div class="top-right">
+      <div class="top-site" id="top-site-chip">—</div>
+      <div class="top-user" id="top-user">—</div>
+      <div class="top-progress" id="top-prog">0%</div>
+    </div>
+  </div>
+
+  <div class="steps-wrap">
+    <div class="pill active" id="pill-0" onclick="goStep(0)">
+      <div class="pill-n"><span class="pill-ni">1</span></div>必須ルール
+    </div>
+    <div class="pill" id="pill-1" onclick="goStep(1)">
+      <div class="pill-n"><span class="pill-ni">2</span></div>時系列
+    </div>
+    <div class="pill" id="pill-2" onclick="goStep(2)">
+      <div class="pill-n"><span class="pill-ni">3</span></div>クイズ
+    </div>
+    <div class="pill" id="pill-3" onclick="goStep(3)">
+      <div class="pill-n"><span class="pill-ni">4</span></div>Q&amp;A
+    </div>
+    <div class="pill" id="pill-4" onclick="goStep(4)">
+      <div class="pill-n"><span class="pill-ni">5</span></div>連絡先
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="done-banner" id="done-banner">
+      <div class="done-stamp">合格</div>
+      <div class="done-title">オンボーディング完了！</div>
+      <div class="done-sub">全ステップを修了しました。現場での活躍を期待しています。</div>
+      <button class="btn btn-t" onclick="restart()" style="max-width:200px;margin:0 auto;display:block">最初からやり直す</button>
+    </div>
+
+    <!-- STEP 0: Rules -->
+    <div class="sec active" id="sec-0">
+      <div class="card">
+        <div class="c-head">
+          <div class="c-title" id="rules-ttl">必須ルール TOP3</div>
+          <div class="tag tag-r">MUST RULE</div>
+        </div>
+        <div id="rules-body"><div class="ai-load"><span class="ai-load-icon">◌</span>AIがコンテンツを生成中...</div></div>
+      </div>
+      <div class="act-row">
+        <button class="btn btn-p" onclick="goStep(1)">次へ：時系列 →</button>
+      </div>
+    </div>
+
+    <!-- STEP 1: Timeline -->
+    <div class="sec" id="sec-1">
+      <div class="card">
+        <div class="c-head">
+          <div class="c-title" id="tl-ttl">今日の業務タイムライン</div>
+          <div class="tag tag-b">TIMELINE</div>
+        </div>
+        <div id="tl-body"><div class="ai-load"><span class="ai-load-icon">◌</span>タイムラインを生成中...</div></div>
+      </div>
+      <div class="act-row">
+        <button class="btn" onclick="goStep(0)">← 戻る</button>
+        <button class="btn btn-p" onclick="goStep(2)">次へ：クイズ →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Quiz -->
+    <div class="sec" id="sec-2">
+      <div class="card">
+        <div class="c-head">
+          <div class="c-title">理解度確認クイズ</div>
+          <div class="tag tag-g">QUIZ · 5問</div>
+        </div>
+        <div class="q-bar-wrap">
+          <div class="q-bar"><div class="q-bar-fill" id="q-bar" style="width:0%"></div></div>
+          <div class="q-count" id="q-cnt">0 / 5</div>
+        </div>
+        <div id="quiz-body"><div class="ai-load"><span class="ai-load-icon">◌</span>クイズを生成中...</div></div>
+        <div class="score-wrap" id="score-wrap">
+          <div class="score-ring">
+            <div class="score-num" id="s-num">0</div>
+            <div class="score-of">/ 5点</div>
+          </div>
+          <div class="score-msg" id="s-msg">—</div>
+          <div class="score-sub" id="s-sub">—</div>
+          <div class="act-row">
+            <button class="btn" onclick="retakeQuiz()">もう一度挑戦</button>
+            <button class="btn btn-p" onclick="goStep(3)">Q&Aへ進む →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Q&A -->
+    <div class="sec" id="sec-3">
+      <div class="card">
+        <div class="c-head">
+          <div class="c-title">状況別Q&amp;A</div>
+          <div class="tag tag-t">Q&amp;A</div>
+        </div>
+        <div id="qa-body"><div class="ai-load"><span class="ai-load-icon">◌</span>Q&Aを生成中...</div></div>
+      </div>
+      <div class="act-row">
+        <button class="btn" onclick="goStep(2)">← クイズ</button>
+        <button class="btn btn-p" onclick="goStep(4)">次へ：連絡先 →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Contacts -->
+    <div class="sec" id="sec-4">
+      <div class="card">
+        <div class="c-head">
+          <div class="c-title">緊急連絡先</div>
+          <div class="tag tag-n">CONTACT</div>
+        </div>
+        <div id="contact-body"><div class="ai-load"><span class="ai-load-icon">◌</span>連絡先を生成中...</div></div>
+      </div>
+      <div class="act-row">
+        <button class="btn" onclick="goStep(3)">← Q&A</button>
+        <button class="btn btn-t" onclick="complete()">学習完了 ✓</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ════ SITE DATA ════ */
+const SITES = {
+  p4:{
+    name:'プロロジスパーク大阪4', code:'P4',
+    manual:`
+【施設基本情報】
+テナント18社、1F〜5F南北館。当務A・当務B・夜勤の3名体制。
+管理会社：ザイマックス関西（渡邊氏・岡瀧氏）。セキュリティ：ALSOK。
+
+【最新追加v2.0情報】
+◆電話対応：着信時「お電話ありがとうございます。プロロジスパーク大阪4 管理室 警備◯◯です。」
+  ①カスタマー名・担当者名確認 ②連絡希望者の確認 ③要件確認 ④メモで確実に報告
+◆休日・祝日の共用部対応（清掃員不在日）：
+  ・吸い殻入れ：満杯→バケツに移し水をはる→SK室のザルにあけ→ゴミ袋→ゴミ庫
+  ・ゴミ庫：運転手控室・5階食堂のゴミ箱が満杯→給湯室のゴミ箱の後ろに置く→新袋セット
+  ・トイレットペーパー補充：サブ1階・運転手控室男性用が使用量が多い（優先）→在庫はSK室
+  ・石鹸液：運転手控室・サブ1階・メイン2階・5階男性用に注意→SK室にペットボトル（大）の緑色液あり
+
+【必須ルール】
+1. 巡回は共用部のみ。テナントエリア内絶対禁止。異常は目視のみ、触れない。
+2. 鍵の貸出は必ず紐を付ける。交代時は声出し本数確認。No.11・41は当務Aが8:40に借受。
+3. 引き継ぎノートに当務者・夜勤者の名前を必ず明記（P4固有ルール）。後出し報告の防止。
+
+【当務A平日時系列】
+8:40 前当務者と引き継ぎ/カードNo.1借受/鍵No.11・41借受/伴日常点検表確認（ザイマックス職員と）
+8:55 管理会社へ朝礼声掛け（2〜3名在籍時）
+9:00-10:00 警備詰所・立哨（雨天・酷暑：詰所内。夏至〜10/10：詰所内、10/10〜12/9：立哨、12/10〜：控え室OK）
+10:00-11:00 休憩
+11:00-11:45 巡回（帽子着帽・白手袋）
+11:45 昼礼（平日のみ）
+11:50-12:50 管理室・監視・受付業務
+13:00-14:00 休憩
+14:00-15:00 巡回
+15:00-16:00 トラック出口立哨
+16:00-17:00 休憩
+17:00 メインエントランス自動扉施錠（自動設定）
+18:00-18:45 巡回
+18:45 鍵No.11・41の返却、伴チェック（BOX①②）
+19:00-20:00 休憩
+20:00-1:00 管理室・監視業務
+1:00-2:00 巡回→カード返却
+2:00-6:00 仮眠
+6:00-8:40 管理室・監視業務
+8:40 引き継ぎ終了・下番
+
+【夜間・早朝定例】
+5:00 メインエントランス連続解除（当務B・夜勤者）
+7:00前後 火・金：5階売店 心幸サービス納品（緑色制服・受付なし）
+7:30 月〜土：シンセイ清掃員3名に鍵貸出+日常清掃チェック表を渡す
+    毎週火曜：4階SBフレームワークス清掃チェック表も渡す
+8:10頃 毎週土曜：シンセイ清掃員が管理室内清掃（流し台・掃除機）
+
+【警報対応】
+・基本は設備（ザイマックス）へ指示を仰ぐ。設備不在時のみ対応。
+・火災警報：本火災→消防署＋所長に至急連絡 / 誤報→所長連絡
+・防犯警報：真報のみ所長連絡、誤報は復旧操作
+・停電・PCS警報：至急所長連絡
+・1人対応：侵入報など / 2人対応：火事・地震・人身事故・大事故
+
+【拾得物】
+・拾得物預かり書に記入→落とし物入れに保管
+・現金・財布はザイマックスさんに必ず手渡す
+
+【テナント主要情報】
+1F：スターバックスジャパン（ドライ8:15〜）、ファミリーマート（24時間）
+3F：アスト西淀川（夜間17:00〜5:30は北側事務所受付）
+4F：SBフレームワークス（土日祝休日）
+    `
+  },
+  p5:{
+    name:'プロロジスパーク大阪5', code:'P5',
+    manual:`
+【施設基本情報】
+カスタマー12テナント、4フロア。24時間当務体制。
+管理会社：ザイマックス関西（谷岡所長）。セキュリティ：ALSOK（カードNo.3）。
+鍵：全37本・カード全7枚（8:30・18:30に点検）。
+
+【最新追加v2.0情報】
+◆シフト表完全版（2026年追加）：
+  平日・土曜：8:30-9:00受付立哨、9:00-10:30外周巡回、11:00-12:00警備BOX立哨（平日）
+  日曜・祝日：巡回時間余り→管理室にてモニター監視。15:00-16:00施設巡回＋4階ゴミ回収。
+◆拾得物マニュアル（2025年10月改訂）：
+  ・拾得物を管理室まで持ち運ぶ際は手で持ったままで移動（ポケット禁止：誤解防止）
+  ・財布：管理会社立会いで現金確認（紙幣・硬貨の金額）
+  ・現金のみ：名前なし→基本引渡しなし、ザイマックスが管理
+  ・携帯電話：着信があれば可能な限り電話に出ること（落とし主から着信の可能性）
+  ・対応は原則2名以上で実施。モニターカメラで移動経路を再生確認。
+◆補足（2026年4月更新）：
+  ・4階ゴミ回収：少量でも袋ごと交換すること。横の新品ゴミ袋は捨てないこと。
+  ・雨天時誤作動：誘導灯（黄色回転灯）・カラス避け音声センサー→直るまで放置
+  ・2階感知器が故障中→夜間・日祝は非常ベルが鳴る設定。発報時は赤ランプ点灯の感知器を特定。
+  ・上りランプ進入禁止発見時：一般人→警察を呼ぶ / カスタマー関係者→ザイマックスへ報告
+
+【カスタマー情報（詳細版）】
+4F-A：サンシャイン株式会社（8:00-19:30、日祝休日、☎06-6613-4500、電話→折り返し）
+4F-B：コイズミ物流/柏木工業（8:00-22:00、土日祝休）、マサル工業（8:00-20:00）
+4F-C：やまや商流（夜間23:00〜/昼間8:00〜、年中無休、☎06-6569-2511）
+3F-A：コイズミ物流（土曜休、引き取りはNo.20バース）
+3F-B：コイズミ証明（8:00-21:00、日曜休）
+2F-A：JP楽天ロジスティックス（7:00〜、年中無休、倉庫直接対応）
+2F-B：大阪運輸（AM降ろし・PM積込、無休）
+1F-A：コカコーラ・合通トラスコ（6:00-21:00、年中無休、☎090-9218-9750）
+1F-B：ダイキントレーディング（8:00-19:00、土日祝休）
+1F-C①：J・FAIR/J・メイド（6:00〜、休日不定、事務所直接→谷岡所長指導済・要注意）
+1F-C②：三陽物産（6:00-15:30、年中無休、3番バース・バインダー記入）
+
+【鍵携帯ルール】
+・平日昼間：ガードBOXの鍵（No.15）を携帯。17:30返却。
+・平日・土曜17:30以降：管理室の鍵を携帯。（管理室扉は20:00〜7:00自動施錠）
+・土日祝：朝から管理室の鍵を携帯。
+・ゴミ回収業者へのゴミ庫鍵貸出は無記載でOK。
+
+【受付心得】
+・服装で判断：スーツ→カスタマー事務所、作業着→バース方面
+・初めての来訪者は不安→安心させる会話が必要
+・アポなし営業は入館を断る
+・J.Fair（J.メイド）の職員には要注意（谷岡所長指導済）
+
+【シフト時系列】
+8:30まで 鍵・カードチェック（全37本・7枚）
+8:30-8:50 受付前立哨（平日） / 受付・監視（日祝）
+9:00-10:30 外周・建物巡回（ゴミ拾い）
+10:30-11:00 休憩
+11:00-12:00 警備BOX立哨（平日）/ モニター監視（日祝）
+13:00-14:00 昼食休憩（鍵はロッカーに置けばお出かけOK）
+15:00-16:00 建物巡回（日祝は4階ゴミ回収も実施）
+18:00-18:30 外周巡回
+23:00-0:00 施設巡回（清掃員控室施錠確認）
+0:00-4:00 仮眠
+5:00-6:00 施設巡回
+6:30-8:30 モニター監視・受付
+8:30 朝礼終了後に下番
+    `
+  },
+  lp:{
+    name:'ロジポート大阪ベイ', code:'LP',
+    manual:`
+【施設基本情報】Amazon・ヤマト物流24時間稼働。管理会社：ザイマックス関西（渡邊氏・岡瀧氏）。セキュリティ：SECOM（TR II Web）。
+【必須ルール】1.SECOM操作：毎朝交代前に必ずアプリ再起動。admin/756でログイン。南側自動扉は平日8:00〜17:30マット有効。
+2.車両事故：「念書」「手続きの流れ」をバインダーに挟んで現場に急行。旧式の簡易事故報告書は使用不可。
+3.Amazonワーカーへの暗証番号教示は絶対禁止。夜間売店利用のトラック運転手のみ施設側で開錠OK。
+【時系列】8:00南側マット有効/9:00-10:30外周巡回(4Fラウンジ照明点灯)/15:25-15:30 4Fテラス扉施錠/16:50-17:20外周巡回(ゴミ庫施錠)/17:30南側マット無効/22:30-24:00巡回(4Fラウンジ照明消灯・エアコンOFF)/5:00-6:00巡回(4FエアコンON・テラス扉解錠・ゴミ庫解錠)/月曜AM5:00会議室解錠/9:00交代
+    `
+  },
+  ko:{
+    name:'コウノイケ物流センター', code:'KO',
+    manual:`
+【必須ルール】1.送迎バスは毎時00分に北ゲートで出庫誘導立哨。毎時15分バス出庫後の巡回+南側バイク置場タバコ吸殻確認を必ず実施。
+2.駐車場内の喫煙者発見時は会社名・名前・携帯番号を控えて鴻池事務所に連絡する。
+3.2025年1月より集荷業者の場所が変更（オカケン・西濃運輸・CS大阪テックは旧トナミ側）。
+【時系列（遅番）】16:00開始/毎時00分北ゲート立哨/毎時15分バス出庫→巡回/20:30バス着20:50/20:55-21:00南ゲート封鎖/21:00-22:30佐川急便集荷/21:15閉鎖業務開始/AM4:00開門
+【集荷案内】輝和:No.1〜5/佐川急便:No.23〜33/ヤマト運輸:No.11/来客:No.1〜7
+    `
+  },
+  ss:{
+    name:'千趣会（大阪市北区同心1-6-23）', code:'SS',
+    manual:`
+【必須ルール】1.開館は14ステップを順番通りに実行。正面自動ドアは「鍵解錠してからブレーカーをON」の順番を必ず守る。
+2.閉館は18:15に正面門扉施錠→「ブレーカーを落としてから」自動ドア施錠の順番を守る。逆にすると自動ドアが壊れる。
+3.17:30以降は荷物受け取り不可（18:00頃に総務部全員が帰宅するため）。
+【時系列】7:30上番/7:40開館業務(14ステップ)/8:10-8:30社員通用口立哨/8:30-9:00エントランス受付立哨/9:00-11:30出入管理/11:30-12:00休憩/12:00-14:00出入管理/14:00-14:30休憩/15:00-15:30貴重品運搬トラック対応/16:30-17:00休憩/17:00-18:00受付移動・駐車場閉鎖/17:50閉館準備/18:00-18:15閉館業務(11ステップ)/18:15正門施錠→自動ドア施錠/18:30業務終了
+【緊急連絡先】総務部 PHS=60322 / 岡本所長 PHS=61651
+    `
+  },
+  ix:{
+    name:'インテックス大阪（駐車場）', code:'IX',
+    manual:`
+【必須ルール】1.料金所・ポール内の横断は絶対禁止。センサーがありポールに当たると破損の恐れあり。ポジション移動は必ず料金所の裏側を回ること。
+2.入庫時：エントランスに近いブロックから埋まる→満車ブロック入口をカラーコーンで即座に仮・封鎖する。
+3.身障者スペースは通常コーンで封鎖。申請があってから外す。満車になったら即座に2号ゲートへ無線報告。
+【業務フロー】入庫:スロープ→右折→入庫レーン/出庫:料金所精算（事前精算機あり）/混雑時:2レーン運用
+【案内文言6種】①エントランスは中央のガラス扉 ②身障者枠は申請後に開放 ③割引は管理室前の機械で ④料金は出口で ⑤出庫ラッシュは各列最後尾へ ⑥事前精算機もご利用ください
+    `
+  }
+};
+
+const SYSPROMPT = `あなたはイーフロ警備会社の新人育成AIです。以下の現場マニュアルデータを参照して、配属初日の隊員向け学習コンテンツをJSON形式のみで生成してください。
+
+現場マニュアル：
+{MANUAL}
+
+配属情報：名前={NAME} / 現場={SITE} / 勤務区分={SHIFT} / 経験={EXP}
+
+必ず純粋なJSONのみを返してください（コードブロック・説明文は一切不要）：
+{
+  "rules":[
+    {"title":"ルール名（10文字以内）","desc":"説明（50字以内）","note":"補足（省略可）"},
+    {"title":"","desc":"","note":""},
+    {"title":"","desc":"","note":""}
+  ],
+  "timeline":[
+    {"time":"HH:MM","action":"やること","detail":"詳細（省略可）","urgent":false},
+    ...10〜15項目
+  ],
+  "quiz":[
+    {"q":"問題文","opts":["A.選択肢","B.選択肢","C.選択肢","D.選択肢"],"ans":0,"exp":"解説（1文）"},
+    ...5問
+  ],
+  "qa":[
+    {"q":"状況（例：火災警報が鳴ったら？）","a":"対応手順（①②③の形式で）"},
+    ...3〜5ケース
+  ],
+  "contacts":[
+    {"name":"名前/部署","role":"役割","how":"連絡方法","type":"r|t|b|g"},
+    ...3〜5件
+  ]
+}`;
+
+/* ════ STATE ════ */
+let user={};
+let content=null;
+let quizData=[];
+let qIdx=0;
+let qScore=0;
+let doneSteps=new Set();
+let curStep=0;
+
+/* ════ START ════ */
+function startApp(){
+  const name=document.getElementById('in-name').value.trim();
+  const site=document.getElementById('in-site').value;
+  const shift=document.getElementById('in-shift').value;
+  const exp=document.getElementById('in-exp').value;
+  if(!name){alert('お名前を入力してください');return}
+  if(!site){alert('配属現場を選択してください');return}
+  user={name,site,shift,exp};
+  const si=SITES[site];
+  document.getElementById('top-site-chip').textContent=si.code;
+  document.getElementById('top-user').textContent=name.split(' ')[0];
+  document.getElementById('scr-welcome').classList.remove('active');
+  document.getElementById('scr-app').classList.add('active');
+  generateContent();
+}
+
+/* ════ API CALL ════ */
+async function generateContent(){
+  const si=SITES[user.site];
+  const prompt=SYSPROMPT
+    .replace('{MANUAL}',si.manual)
+    .replace('{NAME}',user.name)
+    .replace('{SITE}',si.name)
+    .replace('{SHIFT}',user.shift)
+    .replace('{EXP}',user.exp);
+  try{
+    const res=await fetch('/api/claude',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'anthropic-version':'2023-06-01'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2048,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    if(!res.ok)throw new Error('API '+res.status);
+    const d=await res.json();
+    const raw=d.content?.[0]?.text||'';
+    const clean=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    content=JSON.parse(clean);
+  }catch(e){
+    console.warn('API不使用、デモコンテンツを使用:',e.message);
+    content=getDemo(user.site);
+  }
+  renderAll();
+}
+
+/* ════ RENDER ════ */
+function renderAll(){
+  renderRules(content.rules);
+  renderTimeline(content.timeline);
+  renderQuiz(content.quiz);
+  renderQA(content.qa);
+  renderContacts(content.contacts);
+}
+
+function renderRules(rules){
+  const si=SITES[user.site];
+  document.getElementById('rules-ttl').textContent=si.name+' 必須ルール TOP3';
+  if(!rules?.length){document.getElementById('rules-body').innerHTML='<p style="color:var(--ink3);font-size:13px;padding:12px 0">生成できませんでした</p>';return}
+  document.getElementById('rules-body').innerHTML=rules.map((r,i)=>`
+    <div class="rule">
+      <div class="rule-n">${i+1}</div>
+      <div class="rule-body">
+        <div class="rule-title">${esc(r.title)}</div>
+        <div class="rule-desc">${esc(r.desc)}</div>
+        ${r.note?`<div class="rule-note">※ ${esc(r.note)}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function renderTimeline(tl){
+  document.getElementById('tl-ttl').textContent=user.shift+'の業務タイムライン';
+  if(!tl?.length){document.getElementById('tl-body').innerHTML='<p style="color:var(--ink3);font-size:13px;padding:12px 0">生成できませんでした</p>';return}
+  document.getElementById('tl-body').innerHTML=tl.map(t=>`
+    <div class="tl-item">
+      <div class="tl-time">${esc(t.time)}</div>
+      <div class="tl-dot${t.urgent?' u':''}"></div>
+      <div class="tl-body2" style="flex:1">
+        <div class="tl-act">${esc(t.action)}</div>
+        ${t.detail?`<div class="tl-det">${esc(t.detail)}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function renderQuiz(quiz){
+  quizData=quiz||[];
+  qIdx=0;qScore=0;
+  if(quizData.length>0)showQ(0);
+}
+
+function showQ(idx){
+  const qb=document.getElementById('quiz-body');
+  const sw=document.getElementById('score-wrap');
+  sw.classList.remove('show');
+  if(idx>=quizData.length){qb.style.display='none';showScore();return}
+  const q=quizData[idx];
+  const total=quizData.length;
+  document.getElementById('q-bar').style.width=(idx/total*100)+'%';
+  document.getElementById('q-cnt').textContent=idx+' / '+total;
+  qb.style.display='block';
+  qb.innerHTML=`
+    <div class="q-box">
+      <div class="q-text">Q${idx+1}. ${esc(q.q)}</div>
+      <div class="opts">
+        ${q.opts.map((o,i)=>`
+          <button class="opt" onclick="pickAns(${i},${q.ans},'${encodeURIComponent(q.exp||'')}')">
+            <div class="opt-k">${String.fromCharCode(65+i)}</div>
+            ${esc(o.replace(/^[A-Da-d][.）)]\s*/,''))}
+          </button>`).join('')}
+      </div>
+      <div class="q-fb" id="q-fb"></div>
+    </div>
+    <button class="q-next" id="q-next" onclick="nextQ()">${idx+1<total?'次の問題へ →':'結果を見る →'}</button>`;
+}
+
+function pickAns(sel,ans,expEnc){
+  const exp=decodeURIComponent(expEnc);
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  const ok=sel===ans;
+  if(ok)qScore++;
+  document.querySelectorAll('.opt')[sel].classList.add(ok?'ok':'ng');
+  if(!ok)document.querySelectorAll('.opt')[ans].classList.add('ok');
+  const fb=document.getElementById('q-fb');
+  fb.className='q-fb show '+(ok?'ok':'ng');
+  fb.textContent=ok?`◎ 正解！ ${exp}`:`✗ 不正解。正解は${String.fromCharCode(65+ans)}。${exp}`;
+  document.getElementById('q-next').classList.add('show');
+}
+
+function nextQ(){qIdx++;showQ(qIdx)}
+
+function showScore(){
+  const t=quizData.length;
+  document.getElementById('q-bar').style.width='100%';
+  document.getElementById('q-cnt').textContent=t+' / '+t;
+  const sw=document.getElementById('score-wrap');
+  document.getElementById('s-num').textContent=qScore;
+  const p=Math.round(qScore/t*100);
+  let msg,sub;
+  if(p>=80){msg='優秀！現場の準備ができています';sub='高い理解度です。自信を持って業務に臨んでください。'}
+  else if(p>=60){msg='もう少しで合格ライン';sub='間違えた問題を確認してから現場へ向かいましょう。'}
+  else{msg='復習が必要です';sub='必須ルールを確認してもう一度チャレンジしましょう。'}
+  document.getElementById('s-msg').textContent=msg;
+  document.getElementById('s-sub').textContent=sub;
+  sw.classList.add('show');
+  updateProg();
+}
+
+function retakeQuiz(){
+  qIdx=0;qScore=0;
+  document.getElementById('score-wrap').classList.remove('show');
+  showQ(0);
+}
+
+function renderQA(qa){
+  if(!qa?.length){document.getElementById('qa-body').innerHTML='<p style="color:var(--ink3);font-size:13px;padding:12px 0">生成できませんでした</p>';return}
+  document.getElementById('qa-body').innerHTML=qa.map((item,i)=>`
+    <div class="qa-item" id="qa-${i}">
+      <div class="qa-q" onclick="toggleQA(${i})">
+        <div class="qa-icon">Q</div>
+        ${esc(item.q)}
+        <svg class="qa-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="qa-a">${esc(item.a).replace(/\n/g,'<br>').replace(/([①②③④⑤⑥])/g,'<br>$1')}</div>
+    </div>`).join('');
+}
+
+function toggleQA(i){
+  document.getElementById('qa-'+i).classList.toggle('open');
+}
+
+function renderContacts(contacts){
+  if(!contacts?.length){document.getElementById('contact-body').innerHTML='<p style="color:var(--ink3);font-size:13px;padding:12px 0">連絡先情報がありません</p>';return}
+  document.getElementById('contact-body').innerHTML=contacts.map(c=>`
+    <div class="contact">
+      <div class="c-av av-${c.type||'g'}">${esc(c.name.charAt(0))}</div>
+      <div class="c-info">
+        <div class="c-name">${esc(c.name)}</div>
+        <div class="c-role">${esc(c.role)}</div>
+      </div>
+      <div class="c-how">${esc(c.how)}</div>
+    </div>`).join('');
+}
+
+/* ════ STEP NAV ════ */
+function goStep(step){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+step).classList.add('active');
+  doneSteps.add(curStep);
+  curStep=step;
+  document.querySelectorAll('.pill').forEach((p,i)=>{
+    p.classList.remove('active','done');
+    if(doneSteps.has(i))p.classList.add('done');
+  });
+  document.getElementById('pill-'+step).classList.remove('done');
+  document.getElementById('pill-'+step).classList.add('active');
+  updateProg();
+  window.scrollTo(0,0);
+}
+
+function updateProg(){
+  const pct=Math.round(doneSteps.size/5*100);
+  document.getElementById('top-prog').textContent=pct+'%';
+}
+
+function complete(){
+  doneSteps.add(4);
+  document.querySelectorAll('.pill').forEach(p=>{p.classList.remove('active');p.classList.add('done')});
+  document.getElementById('done-banner').classList.add('show');
+  document.getElementById('top-prog').textContent='100%';
+  window.scrollTo(0,0);
+}
+
+function restart(){
+  document.getElementById('scr-app').classList.remove('active');
+  document.getElementById('scr-welcome').classList.add('active');
+  doneSteps.clear();curStep=0;
+  document.getElementById('done-banner').classList.remove('show');
+}
+
+/* ════ UTIL ════ */
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+/* ════ DEMO DATA (P4 v2.0) ════ */
+function getDemo(site){
+  const demos={
+    p4:{
+      rules:[
+        {title:'巡回は共用部のみ',desc:'テナントエリア（事務所内・倉庫内）には絶対に入らない。異常は目視のみ、触れずに設備へ報告。',note:'共用部エリア＝建物4角のエリア'},
+        {title:'鍵管理を徹底する',desc:'鍵貸出時は必ず紐を付ける。交代時は声出しで本数確認。No.11・41は当務Aが8:40に借受。',note:null},
+        {title:'引き継ぎに名前を明記',desc:'P4固有ルール：引き継ぎノートに当務者・夜勤者の名前を必ず明記する。後出し報告の防止が目的。',note:'名前がないと責任の所在が不明確になる'}
+      ],
+      timeline:[
+        {time:'8:40',action:'前当務者と引き継ぎ',detail:'カードNo.1借受。鍵No.11・41借受。伴日常点検表確認（ザイマックス職員と）',urgent:true},
+        {time:'8:55',action:'管理会社へ朝礼声掛け',detail:'2〜3名在籍時に実施',urgent:false},
+        {time:'9:00',action:'警備詰所・立哨',detail:'雨天・酷暑・寒波時は詰所内。夏至〜10/10は詰所内立哨。',urgent:false},
+        {time:'10:00',action:'休憩',detail:null,urgent:false},
+        {time:'11:00',action:'巡回',detail:'帽子着帽・白手袋着用。共用部のみ。',urgent:false},
+        {time:'11:45',action:'昼礼（平日のみ）',detail:'管理会社より今日の予定・問題点確認',urgent:false},
+        {time:'11:50',action:'管理室・監視・受付',detail:'管理会社昼食時間帯',urgent:false},
+        {time:'13:00',action:'休憩',detail:null,urgent:false},
+        {time:'14:00',action:'巡回',detail:'共用部のみ',urgent:false},
+        {time:'15:00',action:'トラック出口立哨',detail:'雨天・酷暑・寒波時は詰所内',urgent:false},
+        {time:'17:00',action:'メインエントランス自動扉施錠',detail:'自動設定',urgent:true},
+        {time:'18:45',action:'鍵No.11・41の返却',detail:'管理会社と伴チェック（BOX①②）',urgent:true},
+        {time:'2:00',action:'仮眠',detail:'〜6:00まで',urgent:false},
+        {time:'8:40',action:'引き継ぎ終了・下番',detail:null,urgent:true}
+      ],
+      quiz:[
+        {q:'P4の引き継ぎノートに必ず明記すべきことは何ですか？',opts:['A.今日の天気','B.当務者・夜勤者の名前','C.管理会社の担当者名','D.巡回した時間'],ans:1,exp:'P4固有ルール。後出し報告の防止と責任の明確化のため名前の明記が必須。'},
+        {q:'巡回時に入室が禁止されているエリアは？',opts:['A.共用部のトイレ','B.テナントエリア（事務所内・倉庫内）','C.警備詰所','D.管理室'],ans:1,exp:'巡回は共用部のみ。テナントエリアには絶対に入らない。'},
+        {q:'鍵No.11とNo.41は誰が何時に借りますか？',opts:['A.夜勤者が20:00','B.当務Bが9:00','C.当務Aが8:40','D.ザイマックスが管理'],ans:2,exp:'当務Aが8:40の引き継ぎ時にNo.11（警備詰所）とNo.41（管理室南入口）を借受。'},
+        {q:'休日・祝日に吸い殻入れが満杯の時の正しい処理方法は？',opts:['A.そのまま放置','B.バケツに移し水をはる→SK室のザルにあける→ゴミ袋→ゴミ庫','C.排水溝に捨てる','D.ザイマックスに連絡して待つ'],ans:1,exp:'清掃員不在の休日は警備員がバケツ→水→ザル→ゴミ袋→ゴミ庫の手順で処理する。'},
+        {q:'電話着信時の正しい一言目の文言は？',opts:['A.はい、イーフロです','B.お電話ありがとうございます。プロロジスパーク大阪4 管理室 警備◯◯です。','C.警備です、ご用件は？','D.プロロジスパーク警備室です'],ans:1,exp:'正式な着信文言。カスタマー名・担当者名の確認→連絡希望者確認→要件確認→メモの流れで対応。'}
+      ],
+      qa:[
+        {q:'火災警報が発報した時はどうすればいいですか？',a:'①基本は設備（ザイマックス）へ指示を仰ぐ。\n②設備不在の場合は現場を確認する。\n③本火災の場合：至急消防署＋所長に連絡する。\n④誤報の場合：所長に連絡する。\n⚠️ 1人対応：侵入報など ／ 2人対応：火事・地震・人身事故・大事故'},
+        {q:'拾得物（財布・現金）を発見した時の手順は？',a:'①拾得物預かり書に記入する。\n②管理会社の方、立会いの上で現金を確認する（紙幣・硬貨の金額を確認）。\n③現金・財布はザイマックスさんに必ず手渡す。\n④落とし主に引き渡せた場合は書類のみ保管する。'},
+        {q:'電話着信時の対応手順を教えてください（P4）',a:'①「お電話ありがとうございます。プロロジスパーク大阪4 管理室 警備◯◯です。」\n②相手先のカスタマー名・担当者の名前を確認する。\n③連絡希望者の確認（管理会社側の担当は誰を希望されるのか）。\n④要件の確認。\n⑤伝言などの要件をメモに記入し、確実に報告できる様にする。'}
+      ],
+      contacts:[
+        {name:'ザイマックス関西',role:'管理会社（渡邊氏・岡瀧氏）',how:'管理室直通',type:'r'},
+        {name:'管制（寺川氏）',role:'会社管制',how:'会社携帯',type:'t'},
+        {name:'中島誠一',role:'管理責任者・イーフロ',how:'会社携帯',type:'b'},
+        {name:'消防署',role:'火災・救急',how:'119',type:'r'}
+      ]
+    },
+    p5:{
+      rules:[
+        {title:'受付心得を実践',desc:'服装で来訪者を判断：スーツ→カスタマー事務所、作業着→バース方面。初めての来訪者は安心させる会話を。',note:'アポなし営業は入館を断る。J.FAIRの職員には要注意（谷岡所長指導済）'},
+        {title:'鍵携帯ルールを守る',desc:'平日昼間：ガードBOXの鍵（No.15）を携帯→17:30返却。17:30以降・土日祝：管理室の鍵を携帯。',note:'管理室扉は20:00〜7:00まで自動施錠設定'},
+        {title:'拾得物は手で持って移動',desc:'拾得物を管理室まで持ち運ぶ際は必ず手で持ったまま移動する。ポケットに入れることは誤解を招く行為。',note:'対応は原則2名以上で実施。モニターカメラで経路を再生確認する。'}
+      ],
+      timeline:[
+        {time:'〜8:30',action:'鍵・カードチェック',detail:'全37本・カード7枚を確認',urgent:true},
+        {time:'8:30〜8:50',action:'受付前立哨（平日）',detail:'出勤職員への挨拶・問い合わせ対応',urgent:false},
+        {time:'9:00〜10:30',action:'外周・建物巡回',detail:'ゴミ拾い・植栽の木の枝確認',urgent:false},
+        {time:'10:30〜11:00',action:'休憩',detail:null,urgent:false},
+        {time:'11:00〜12:00',action:'警備BOX立哨（平日）',detail:'入口監視・案内',urgent:false},
+        {time:'13:00〜14:00',action:'昼食休憩',detail:'鍵はロッカーに置けばお出かけOK',urgent:false},
+        {time:'15:00〜16:00',action:'建物巡回',detail:'共用部・中央車路。日祝は4階ゴミ回収も実施（袋ごと交換・新品袋は捨てない）',urgent:false},
+        {time:'18:00〜18:30',action:'外周巡回',detail:'ゴミ拾い',urgent:false},
+        {time:'19:30〜21:30',action:'モニター監視・受付',detail:null,urgent:false},
+        {time:'23:00〜0:00',action:'施設巡回',detail:'清掃員控室の施錠確認',urgent:false},
+        {time:'0:00〜4:00',action:'仮眠',detail:null,urgent:false},
+        {time:'4:00頃〜',action:'清掃員 足立さんへ鍵貸出',detail:'平日・祝日',urgent:false},
+        {time:'5:00〜6:00',action:'施設巡回',detail:null,urgent:false},
+        {time:'8:30',action:'朝礼終了後に下番',detail:null,urgent:true}
+      ],
+      quiz:[
+        {q:'P5で拾得物を発見した時、管理室まで持ち運ぶ際の正しい方法は？',opts:['A.ポケットに入れて移動','B.手で持ったままで移動する','C.その場に置いておく','D.袋に入れてから移動'],ans:1,exp:'ポケットに入れることは誤解を招く行為。必ず手で持ったままで移動する。'},
+        {q:'平日の17:30以降に携帯すべき鍵はどれですか？',opts:['A.ガードBOXの鍵（No.15）','B.管理室の鍵','C.ゴミ庫の鍵','D.清掃員控室の鍵'],ans:1,exp:'17:30警備BOX終了後はガードBOX鍵を返却し、管理室の鍵を携帯する。管理室扉は20:00〜7:00自動施錠。'},
+        {q:'J.FAIRの職員への対応に関して正しいのはどれですか？',opts:['A.普通に対応してOK','B.谷岡所長指導済のため要注意で対応','C.入館を全て断る','D.ザイマックスの許可なく案内する'],ans:1,exp:'J.FAIRはP5で特に注意が必要なカスタマー。谷岡所長から指導が入っている。'},
+        {q:'日曜・祝日の4階ゴミ回収で注意すべき事は？',opts:['A.ゴミが多い袋だけ交換する','B.ゴミが少量でも袋ごと捨てる。横の新品ゴミ袋は捨てない。','C.ゴミ回収は不要','D.全部まとめて一つの袋に入れる'],ans:1,exp:'森田さんからのお願い：少量でも袋ごと交換する。ゴミ箱横の新品ゴミ袋を一緒に捨てないこと。'},
+        {q:'雨天時にP5で誤作動する設備として正しいのはどれですか？',opts:['A.エレベーター','B.誘導灯（黄色回転灯）とカラス避け音声センサー','C.自動扉','D.監視カメラ'],ans:1,exp:'雨天時は誘導灯・カラス避け音声センサーが誤作動することがある。直るまで放置でOK。'}
+      ],
+      qa:[
+        {q:'4階ゴミ回収時の注意事項を教えてください',a:'①ゴミが少量でも個々のゴミ箱の袋ごと捨てること。\n②ゴミ箱の横に掛けている新品のゴミ袋は捨てないこと。\n③特に日曜日・祝日の回収時に注意すること（森田さんからのお願い）。'},
+        {q:'2階の感知器が発報した時の夜間の対応は？',a:'①現在2階の感知器が故障中で誤発報の可能性がある。\n②昼間は連動停止しているため非常ベルは鳴らない。\n③夜間・日祝は非常ベルが鳴る設定になっている。\n④次回発報時は赤ランプが点灯・点滅している感知器を特定すること。\n⑤火災警報発報の場合は電話連絡が必要。感知器故障・汚れの発報は電話連絡不要。'},
+        {q:'上りランプへの一般人の進入を発見した場合の対応は？',a:'①当館に関係のない一般人の場合：警察を呼ぶ。\n②カスタマー関係者の場合：ザイマックスへ報告しカスタマー責任者への厳重注意を行う。\n③日曜・祝日の場合：翌平日に報告しカスタマーへ注意する。'}
+      ],
+      contacts:[
+        {name:'谷岡所長',role:'ザイマックス関西・管理会社所長',how:'管理室連絡',type:'r'},
+        {name:'中島誠一',role:'イーフロ管理責任者',how:'深夜・緊急時',type:'b'},
+        {name:'合通トラスコ（1F-A）',role:'カスタマー',how:'090-9218-9750',type:'g'},
+        {name:'サンシャイン（4F-A）',role:'カスタマー',how:'06-6613-4500',type:'g'},
+        {name:'消防署',role:'火災・救急',how:'119',type:'r'}
+      ]
+    }
+  };
+  return demos[site]||demos['p4'];
+}
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW登録完了:', r.scope))
+      .catch(e => console.log('SW登録失敗:', e));
+  });
+}
+</script>
+</body>
+</html>
