@@ -1,0 +1,25 @@
+{
+  "name": "EFLO 現場AIBot",
+  "short_name": "現場AIBot",
+  "description": "株式会社イーフロ 現場警備員向けAI支援システム",
+  "start_url": "/eflo_field_ai_bot.html",
+  "display": "standalone",
+  "background_color": "#0d0f14",
+  "theme_color": "#00c6a2",
+  "orientation": "portrait-primary",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon_bot.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon_bot.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
