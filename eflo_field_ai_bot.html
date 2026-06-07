@@ -1319,18 +1319,13 @@ async function sendMessage() {
     removeTyping();
     let errMsg = '';
     if (err.message.includes('401') || err.message.includes('403')) {
-      errMsg = '⚠️ APIキー認証エラー：proxy_server.pyのAPIキーを確認してください。';
-    } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('fetch')) {
-      errMsg = '⚠️ サーバーが起動していません。<br>ターミナルで以下を実行してください：<br><br><code style="background:rgba(0,0,0,.2);padding:4px 8px;border-radius:4px;font-size:11px">cd ~/Downloads/eflo_app && python3 proxy_server.py</code>';
+      errMsg = '⚠️ APIキー認証エラーが発生しました。管理者（中島誠一）にご連絡ください。';
+    } else if (err.message.includes('500') || err.message.includes('502') || err.message.includes('503')) {
+      errMsg = '⚠️ サーバーエラーが発生しました。しばらく待ってから再度お試しください。';
     } else {
-      errMsg = `⚠️ エラー：${err.message}`;
+      errMsg = '⚠️ 通信エラーが発生しました。ネットワーク接続を確認して再度お試しください。';
     }
     addMessage('ai', `<span style="color:var(--red)">${errMsg}</span>`);
-
-    const demo = getDemoResponse(text, currentSite);
-    if (demo) {
-      setTimeout(() => addMessage('ai', formatAIResponse(demo)), 800);
-    }
   }
 
   isProcessing = false;
@@ -1354,28 +1349,6 @@ function formatAIResponse(text) {
   return html;
 }
 
-function getDemoResponse(question, site) {
-  const q = question.toLowerCase();
-  const demos = {
-    p4: {
-      '拾得物': `【拾得物の対応手順（P4）】\n①拾得物を発見したら、拾得物預かり書に記入し落とし物入れに保管する\n②現金・財布の落とし物は、用紙に記入後ザイマックスさんに必ず手渡すこと\n③落とし主に引き渡しできた場合は書類のみ保管する\n④警察届出後は「拾得物預かり書」がファイルに挟まれる\n\n【参照マニュアル】プロロジスパーク大阪4 · 拾得物管理`,
-      '火災': `【火災警報 対応手順（P4）】\n①基本は設備（ザイマックス）へ指示を仰ぐ\n②現場を確認し、本火災の場合は至急 消防署＋所長に連絡する\n③誤報の場合は所長に連絡する\n④防排煙設備警報の場合も現場確認→所長に連絡\n\n（注意）主音響停止を先に止めること\n\n【参照マニュアル】プロロジスパーク大阪4 · 警報対応`,
-      '鍵': `【鍵管理の手順（P4）】\n①平日当務A：8:40分に鍵No.11（警備詰所）・No.41（管理室南入口）を借りる\n②鍵の貸出時は紐を付けて貸し出すこと\n③勤務交代時・設備退勤時に鍵の点検を行う（声出し確認）\n④18:45に鍵No.11・41を返却し、管理会社と伴チェックを行う\n\nキーBOX①：計41set 114本保管\nキーBOX②：計6set 9本・ゴミ庫鍵1本保管\n\n【参照マニュアル】プロロジスパーク大阪4 · 鍵管理`
-    },
-    lp: {
-      '事故': `【車両事故 初動対応（ロジポート）】\n①（重要）人身事故の場合は救急処置および救急車対応（119）を最優先\n②「念書」「手続きの流れ」をバインダーに挟んで現場に急行する\n③惹起者の記入欄は当事者に記入してもらう\n④事故現場の写真を携帯で撮影する\n⑤警察要請は当事者またはテナントが行う（施設側は人身事故以外行わない）\n⑥物損事故：建物・車両の被害確認→カラーコーンで囲い、破片を移動回収\n\n（注意）旧式の簡易事故報告書は使用不可（2022年5月10日〜新規「念書」を使用）\n\n【参照マニュアル】ロジポート大阪ベイ · 車両事故対応`,
-      'secom': `【SECOM操作手順（ロジポート）】\n①カーソルを画面下部→eマークを右クリック\n②「TR II Web」をクリック\n③ログインID：admin ／ パスワード：756\n④監視系→入退室監視→通常画面→扉状態一覧の南エントランスをクリック\n⑤遠隔制御（決定ボタン）＝扉→瞬間開錠\n\n自動扉開放：運用モード→マット有効→運用モード制御\n自動扉施錠：運用モード→マット無効→運用モード制御\n\n（注意）朝の交代前にSECOM・PCのアプリケーションを必ず再起動すること\n\n【参照マニュアル】ロジポート大阪ベイ · SECOM操作`
-    },
-    ss: {
-      '開館': `【開館手順（千趣会）全14ステップ】\n①1階通用口の足元照明・通用口照明を消灯\n②最終退館者記入簿の回収\n③受付に臨時入退館記録表を設置\n④着替え→マスターキー・カードキー・PHSを装備\n⑤防災センター内の受付横 鉄扉を解錠\n⑥不在表を1階防災センター出入り口・社員用通用口に掲示\n⑦1階ゴミ庫・車道側の扉を解錠（観音開き扉）\n⑧地下1階通路の照明を点灯 / 駐車場シャッターを開放\n⑨1階受付の準備（電話機2台・iPad2台→カウンター上に設置・照明点灯）\n⑩2階ミーティングルーム（201〜204）扉を開放\n⑪新館5階 休憩室ポット2台 水量チェック・補充\n⑫正面自動ドアを解錠（鍵解錠してからブレーカーをON）\n⑬8:00 正面門扉を解錠。不在表を回収。\n⑭ゴミ回収終了後→ゴミ庫・車道側の扉を施錠\n\n【参照マニュアル】千趣会 · 開館手順`
-    }
-  };
-  const siteDemo = demos[site] || {};
-  for (const [key, val] of Object.entries(siteDemo)) {
-    if (q.includes(key)) return val;
-  }
-  return null;
-}
 
 function selectSite(btn, siteKey) {
   document.querySelectorAll('.site-btn').forEach(b => b.classList.remove('active'));
