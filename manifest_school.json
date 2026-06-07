@@ -1,0 +1,25 @@
+{
+  "name": "EFLO 警備学校",
+  "short_name": "警備学校",
+  "description": "株式会社イーフロ 新人隊員向けオンボーディングシステム",
+  "start_url": "/eflo_onboarding_v2.html",
+  "display": "standalone",
+  "background_color": "#18150f",
+  "theme_color": "#b83228",
+  "orientation": "portrait-primary",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon_school.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon_school.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
