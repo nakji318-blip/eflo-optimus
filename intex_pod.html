@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>INTEX AI — インテックス大阪 駐車場警備支援</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0e1117;--ink2:#2a2f3a;--ink3:#5a6070;--ink4:#9aa0ad;
+  --bg:#f5f6f8;--bg2:#eceef2;--bg3:#e2e5eb;
+  --blue:#1a4a8a;--blue2:#2460b0;--blue-bg:#e8f0fb;--blue-bd:#b8cff0;
+  --orange:#c84820;--orange2:#e05830;--orange-bg:#fdf0ec;--orange-bd:#f0c8bc;
+  --green:#1a6840;--green2:#2a8850;--green-bg:#e8f5ee;--green-bd:#b8dfc8;
+  --yellow:#7a5a10;--yellow-bg:#fdf8e8;--yellow-bd:#e8d890;
+  --red:#b83228;
+  --border:rgba(14,17,23,.09);--border2:rgba(14,17,23,.15);
+  --shadow:0 1px 4px rgba(14,17,23,.07);
+  --shadow2:0 4px 24px rgba(14,17,23,.10);
+  --r:10px;--r2:16px;
+  --font:'Zen Kaku Gothic New',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--ink);-webkit-font-smoothing:antialiased}
+
+/* ── レイアウト ── */
+.app{display:flex;flex-direction:column;height:100vh;background:var(--bg)}
+
+/* ── ヘッダー ── */
+.hdr{
+  background:var(--blue);
+  padding:0 16px;
+  display:flex;align-items:center;gap:10px;
+  height:52px;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+.hdr-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:12px;
+  background:rgba(255,255,255,.12);
+  font-size:9px;font-family:var(--mono);letter-spacing:.1em;color:rgba(255,255,255,.7);
+  text-transform:uppercase;
+}
+.hdr-dot{width:5px;height:5px;border-radius:50%;background:#4adfb0;
+  animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-title{font-size:16px;font-weight:700;color:#fff;flex:1}
+.hdr-title span{color:#4adfb0}
+.hdr-sub{font-size:10px;color:rgba(255,255,255,.5);font-family:var(--mono)}
+
+/* ── クイックアクセスバー ── */
+.quick-bar{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:8px 14px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;
+}
+.quick-bar::-webkit-scrollbar{display:none}
+.q-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 11px;border-radius:20px;
+  border:1px solid var(--border2);background:var(--bg);
+  font-size:11px;color:var(--ink2);cursor:pointer;
+  white-space:nowrap;transition:all .15s;font-family:var(--font);
+}
+.q-btn:hover{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.q-btn .qi{font-size:13px}
+
+/* ── メインエリア ── */
+.main{display:flex;flex:1;min-height:0;gap:0}
+
+/* ── サイドバー ── */
+.sidebar{
+  width:200px;flex-shrink:0;
+  background:#fff;border-right:1px solid var(--border);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+.sb-section{padding:12px 12px 4px;font-size:10px;font-family:var(--mono);
+  color:var(--ink4);letter-spacing:.08em;text-transform:uppercase}
+.sb-item{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 14px;cursor:pointer;
+  font-size:12px;font-weight:500;color:var(--ink2);
+  transition:background .12s;border-left:3px solid transparent;
+}
+.sb-item:hover{background:var(--bg);color:var(--ink)}
+.sb-item.active{
+  background:var(--blue-bg);color:var(--blue);
+  border-left-color:var(--blue);
+}
+.sb-item .si{font-size:16px;flex-shrink:0}
+.sb-item .sl{flex:1;line-height:1.3}
+.sb-item .ss{font-size:10px;color:var(--ink4);font-weight:400}
+.sb-divider{height:1px;background:var(--border);margin:6px 12px}
+
+/* ── チャットエリア ── */
+.chat-wrap{flex:1;display:flex;flex-direction:column;min-width:0}
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.messages::-webkit-scrollbar{width:4px}
+.messages::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+
+/* メッセージ */
+.msg{display:flex;gap:10px;max-width:92%}
+.msg.user{flex-direction:row-reverse;align-self:flex-end}
+.msg-av{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+}
+.av-ai{background:var(--blue);color:#fff}
+.av-user{background:var(--ink2);color:#fff}
+.msg-body{
+  padding:10px 14px;border-radius:12px;
+  font-size:13px;line-height:1.65;
+  box-shadow:var(--shadow);
+}
+.msg.ai .msg-body{background:#fff;border:1px solid var(--border);border-bottom-left-radius:4px}
+.msg.user .msg-body{background:var(--blue2);color:#fff;border-bottom-right-radius:4px}
+
+/* システムメッセージ */
+.msg-sys{
+  background:var(--blue-bg);border:1px solid var(--blue-bd);
+  border-radius:var(--r);padding:12px 14px;
+  font-size:12px;color:var(--blue2);line-height:1.6;
+}
+.msg-sys .ms-title{font-size:13px;font-weight:700;margin-bottom:6px;
+  display:flex;align-items:center;gap:6px}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.chip{
+  padding:3px 10px;border-radius:12px;
+  background:rgba(26,72,138,.12);color:var(--blue);
+  font-size:11px;cursor:pointer;border:1px solid var(--blue-bd);
+  transition:all .15s;
+}
+.chip:hover{background:var(--blue);color:#fff}
+
+/* タイピング */
+.typing{display:flex;align-items:center;gap:4px;padding:8px 12px;
+  background:#fff;border:1px solid var(--border);border-radius:12px;
+  width:fit-content;border-bottom-left-radius:4px}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--ink4);
+  animation:bounce .9s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+/* AIレスポンスのフォーマット */
+.msg-body h4{font-size:13px;font-weight:700;color:var(--blue);margin:8px 0 4px}
+.msg-body h4:first-child{margin-top:0}
+.msg-body ul{padding-left:16px;margin:4px 0}
+.msg-body li{margin:3px 0;line-height:1.5}
+.msg-body .step{
+  display:flex;gap:8px;padding:5px 0;
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+.msg-body .step:last-child{border-bottom:none}
+.msg-body .step-n{
+  width:18px;height:18px;border-radius:50%;flex-shrink:0;
+  background:var(--blue);color:#fff;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin-top:2px;
+}
+.msg-body .step-b{flex:1;font-size:12px;line-height:1.5}
+.msg-body .alert{
+  background:var(--orange-bg);border:1px solid var(--orange-bd);
+  border-radius:6px;padding:7px 10px;
+  font-size:12px;color:var(--orange);margin:6px 0;font-weight:500;
+}
+.msg-body .note{
+  background:var(--yellow-bg);border:1px solid var(--yellow-bd);
+  border-radius:6px;padding:6px 10px;
+  font-size:11px;color:var(--yellow);margin:4px 0;
+}
+.msg-body .ref{font-size:11px;color:var(--ink4);margin-top:8px;
+  padding-top:6px;border-top:1px solid var(--border)}
+
+/* 入力エリア */
+.input-area{
+  padding:12px 14px;background:#fff;
+  border-top:1px solid var(--border);
+  display:flex;gap:10px;align-items:flex-end;
+}
+.input-wrap{
+  flex:1;background:var(--bg);border:1.5px solid var(--border2);
+  border-radius:var(--r2);padding:9px 14px;
+  display:flex;align-items:flex-end;gap:8px;
+  transition:border-color .15s;
+}
+.input-wrap:focus-within{border-color:var(--blue)}
+#msg-input{
+  flex:1;background:transparent;border:none;outline:none;
+  font-family:var(--font);font-size:13px;color:var(--ink);
+  resize:none;max-height:120px;line-height:1.5;
+}
+#msg-input::placeholder{color:var(--ink4)}
+.input-count{font-size:10px;color:var(--ink4);font-family:var(--mono);flex-shrink:0}
+.send-btn{
+  width:42px;height:42px;border-radius:50%;border:none;
+  background:var(--blue2);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;transition:all .15s;flex-shrink:0;
+}
+.send-btn:hover{background:var(--blue);transform:scale(1.05)}
+.send-btn:disabled{background:var(--bg3);cursor:default;transform:none}
+
+/* ── 情報パネル（サイドバーのカテゴリ）── */
+.panel{display:none;flex:1;overflow-y:auto;padding:16px;background:var(--bg)}
+.panel.active{display:block}
+.panel::-webkit-scrollbar{width:4px}
+.panel::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+
+.p-card{
+  background:#fff;border:1px solid var(--border);
+  border-radius:var(--r2);padding:14px 16px;margin-bottom:12px;
+  box-shadow:var(--shadow);
+}
+.p-title{font-size:13px;font-weight:700;color:var(--ink);
+  margin-bottom:10px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+}
+.p-badge{font-size:9px;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-weight:700}
+.pb-r{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-bd)}
+.pb-b{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)}
+.pb-g{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.pb-y{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-bd)}
+
+.row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;
+  border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.rl{width:80px;flex-shrink:0;font-size:11px;font-weight:500;color:var(--ink3);padding-top:1px;line-height:1.4}
+.rb{flex:1;font-size:12px;color:var(--ink);line-height:1.5}
+.rn{font-size:11px;color:var(--ink4);margin-top:2px}
+
+.warn{background:var(--orange-bg);border:1px solid var(--orange-bd);
+  border-radius:var(--r);padding:9px 12px;margin-bottom:10px;
+  font-size:12px;color:var(--orange);font-weight:500;line-height:1.6}
+.info{background:var(--blue-bg);border:1px solid var(--blue-bd);
+  border-radius:var(--r);padding:9px 12px;margin-bottom:10px;
+  font-size:12px;color:var(--blue2);line-height:1.6}
+
+.flow{display:flex;flex-direction:column;gap:4px}
+.flow-row{display:flex;align-items:center;gap:6px}
+.flow-n{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--blue);color:#fff;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.flow-n.r{background:var(--orange)}
+.flow-b{flex:1;font-size:12px;color:var(--ink);line-height:1.4;
+  background:var(--bg);padding:5px 10px;border-radius:6px}
+.flow-arrow{color:var(--ink4);text-align:center;font-size:12px;margin-left:11px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mini{background:var(--bg);border-radius:var(--r);padding:10px 12px}
+.mini .ml{font-size:10px;color:var(--ink3);margin-bottom:3px}
+.mini .mv{font-size:18px;font-weight:700;color:var(--ink)}
+.mini .ms{font-size:10px;color:var(--ink4);margin-top:2px}
+
+/* PDF出力ボタン */
+.pdf-btn{
+  display:flex;align-items:center;gap:8px;
+  width:100%;padding:11px 16px;
+  background:var(--blue2);color:#fff;
+  border:none;border-radius:var(--r);
+  font-family:var(--font);font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;margin-top:8px;
+  box-shadow:0 2px 8px rgba(36,96,176,.3);
+}
+.pdf-btn:hover{background:var(--blue);transform:translateY(-1px)}
+.pdf-btn .pb-icon{font-size:18px}
+
+/* モバイル対応 */
+@media(max-width:640px){
+  .sidebar{display:none}
+  .main{flex-direction:column}
+}
+
+/* ── PDFプリント用 ── */
+@media print{
+  .hdr,.quick-bar,.sidebar,.input-area{display:none!important}
+  .app{height:auto}
+  .messages{overflow:visible;height:auto}
+  .panel{display:block!important;overflow:visible}
+  .pdf-btn{display:none!important}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ヘッダー -->
+  <div class="hdr">
+    <div class="hdr-badge"><div class="hdr-dot"></div>LIVE</div>
+    <div class="hdr-title">INTEX <span>AI</span></div>
+    <div>
+      <div style="font-size:12px;font-weight:700;color:#fff">インテックス大阪</div>
+      <div class="hdr-sub">駐車場警備 専用支援システム</div>
+    </div>
+  </div>
+
+  <!-- クイックアクセス -->
+  <div class="quick-bar">
+    <button class="q-btn" onclick="quickSend('コーン調整の手順を教えて')"><span class="qi">🔶</span>コーン調整</button>
+    <button class="q-btn" onclick="quickSend('料金所横断の注意事項は？')"><span class="qi">⚠️</span>料金所注意</button>
+    <button class="q-btn" onclick="quickSend('身障者スペースの管理方法は？')"><span class="qi">♿</span>身障者対応</button>
+    <button class="q-btn" onclick="quickSend('混雑時の対応手順を教えて')"><span class="qi">🚗</span>混雑対応</button>
+    <button class="q-btn" onclick="quickSend('標準案内文言を全部教えて')"><span class="qi">💬</span>案内文言</button>
+    <button class="q-btn" onclick="quickSend('P4臨時駐車場の対応方法は？')"><span class="qi">🅿️</span>P4臨時</button>
+    <button class="q-btn" onclick="quickSend('2号ゲートへの無線報告の仕方は？')"><span class="qi">📻</span>無線報告</button>
+    <button class="q-btn" onclick="quickSend('事前精算機の案内方法は？')"><span class="qi">💳</span>事前精算機</button>
+  </div>
+
+  <!-- メイン -->
+  <div class="main">
+
+    <!-- サイドバー -->
+    <div class="sidebar">
+      <div class="sb-section">メニュー</div>
+
+      <div class="sb-item active" id="nav-chat" onclick="showPanel('chat')">
+        <span class="si">💬</span>
+        <div class="sl">AIチャット<div class="ss">質問・回答</div></div>
+      </div>
+
+      <div class="sb-item" id="nav-manual" onclick="showPanel('manual')">
+        <span class="si">📋</span>
+        <div class="sl">業務マニュアル<div class="ss">手順・ルール一覧</div></div>
+      </div>
+
+      <div class="sb-item" id="nav-flow" onclick="showPanel('flow')">
+        <span class="si">🚗</span>
+        <div class="sl">車両フロー<div class="ss">入庫・出庫・誘導</div></div>
+      </div>
+
+      <div class="sb-item" id="nav-phrase" onclick="showPanel('phrase')">
+        <span class="si">💬</span>
+        <div class="sl">案内文言集<div class="ss">6種類の標準文言</div></div>
+      </div>
+
+      <div class="sb-item" id="nav-contact" onclick="showPanel('contact')">
+        <span class="si">📞</span>
+        <div class="sl">緊急連絡先<div class="ss">無線・報告先</div></div>
+      </div>
+
+      <div class="sb-divider"></div>
+      <div class="sb-section">出力</div>
+
+      <div class="sb-item" onclick="printManual()">
+        <span class="si">🖨️</span>
+        <div class="sl">PDF出力<div class="ss">マニュアルを印刷</div></div>
+      </div>
+    </div>
+
+    <!-- チャットパネル -->
+    <div class="panel active" id="panel-chat" style="padding:0;display:flex;flex-direction:column;flex:1">
+      <div class="messages" id="messages">
+        <div class="msg-sys">
+          <div class="ms-title">🅿️ インテックス大阪 駐車場警備 AIに接続しました</div>
+          このAIはインテックス大阪の駐車場警備マニュアルを参照して回答します。<br>
+          屋上駐車場・第一駐車場・P4臨時駐車場の3エリア対応。
+          <div class="chips">
+            <span class="chip" onclick="quickSend('コーン調整の手順を教えて')">🔶 コーン調整</span>
+            <span class="chip" onclick="quickSend('料金所横断の注意は？')">⚠️ 料金所</span>
+            <span class="chip" onclick="quickSend('身障者スペースの管理は？')">♿ 身障者対応</span>
+            <span class="chip" onclick="quickSend('標準案内文言を全部教えて')">💬 案内文言</span>
+            <span class="chip" onclick="quickSend('混雑時の誘導手順は？')">🚗 混雑対応</span>
+          </div>
+        </div>
+      </div>
+      <div class="input-area">
+        <div class="input-wrap">
+          <textarea id="msg-input" rows="1" placeholder="業務について質問してください（例：コーンをどのタイミングで封鎖する？）" oninput="autoResize(this);updateCount()"></textarea>
+          <div class="input-count" id="char-count">0 / 500</div>
+        </div>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
+      </div>
+    </div>
+
+    <!-- 業務マニュアルパネル -->
+    <div class="panel" id="panel-manual">
+      <div class="p-card">
+        <div class="p-title">⚠️ 絶対厳守事項 <span class="p-badge pb-r">MUST</span></div>
+        <div class="warn">料金所・ポール内の横断は絶対禁止。センサーがあり、ポールに当たると破損の恐れがある。ポジション移動・休憩時は必ず料金所の裏側を回ること。</div>
+        <div class="info">身障者スペースは通常カラーコーンで封鎖。申請があってから初めてコーンを外す。</div>
+      </div>
+
+      <div class="p-card">
+        <div class="p-title">🔶 カラーコーン調整 — 入庫時 <span class="p-badge pb-b">入庫</span></div>
+        <div class="flow">
+          <div class="flow-row"><div class="flow-n">1</div><div class="flow-b">エントランスに近いブロックから駐車枠が埋まっていく</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">2</div><div class="flow-b">満車のブロック入口をカラーコーンで仮・封鎖する（残り枠が少なくても随時）</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n r">!</div><div class="flow-b">封鎖しないと出口に車両が多数回り込み、案内・誘導の妨げになる</div></div>
+        </div>
+      </div>
+
+      <div class="p-card">
+        <div class="p-title">🔶 カラーコーン調整 — 出庫時 <span class="p-badge pb-b">出庫</span></div>
+        <div class="flow">
+          <div class="flow-row"><div class="flow-n">1</div><div class="flow-b">入庫導線の分岐ポイントから左右に出庫車両を分けて流す</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">2</div><div class="flow-b">全体の流れを2箇所の料金所に分岐させてスムーズに捌く</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">3</div><div class="flow-b">料金所に近いブロックから渋滞が始まりやすい → ブロック入口を封鎖して大回りルートへ誘導</div></div>
+        </div>
+      </div>
+
+      <div class="p-card">
+        <div class="p-title">♿ 身障者スペース運用 <span class="p-badge pb-g">手順</span></div>
+        <div class="flow">
+          <div class="flow-row"><div class="flow-n">1</div><div class="flow-b">通常はカラーコーンで駐車不可状態にしておく</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">2</div><div class="flow-b">身障者の方から申請があった後にコーンを外し駐車案内</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">3</div><div class="flow-b">満車になったら2号ゲートに無線で報告</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">4</div><div class="flow-b">2号ゲートから問い合わせ無線 → 「空きが出来たらお知らせします」と応答</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">5</div><div class="flow-b">空きが出来たら即座に2号ゲートへ無線報告</div></div>
+        </div>
+      </div>
+
+      <div class="p-card">
+        <div class="p-title">🅿️ P4臨時駐車場 <span class="p-badge pb-y">臨時</span></div>
+        <div class="row"><div class="rl">用途</div><div class="rb">メイン駐車場満車時に開放するオーバーフロー対応</div></div>
+        <div class="row"><div class="rl">出入口</div><div class="rb">1箇所（料金所あり）。入庫はUターン動線。</div></div>
+        <div class="row"><div class="rl">歩行者</div><div class="rb">左側（西側）に独立した歩行者通路あり</div></div>
+      </div>
+
+      <button class="pdf-btn" onclick="printManual()">
+        <span class="pb-icon">🖨️</span> マニュアルをPDFで出力する
+      </button>
+    </div>
+
+    <!-- 車両フローパネル -->
+    <div class="panel" id="panel-flow">
+      <div class="p-card">
+        <div class="p-title">📊 施設概要 <span class="p-badge pb-b">INFO</span></div>
+        <div class="grid2" style="margin-bottom:8px">
+          <div class="mini"><div class="ml">エリア数</div><div class="mv">3</div><div class="ms">屋上・第一・P4臨時</div></div>
+          <div class="mini"><div class="ml">料金所</div><div class="mv">通常1 / 混雑2</div><div class="ms">2レーン運用</div></div>
+          <div class="mini"><div class="ml">事前精算機</div><div class="mv">あり</div><div class="ms">積極的に案内</div></div>
+          <div class="mini"><div class="ml">身障者枠</div><div class="mv">要申請</div><div class="ms">通常はコーン封鎖</div></div>
+        </div>
+      </div>
+
+      <div class="p-card">
+        <div class="p-title">🚗 屋上駐車場 入庫フロー <span class="p-badge pb-b">入庫</span></div>
+        <div class="flow">
+          <div class="flow-row"><div class="flow-n">1</div><div class="flow-b">スロープ登坂</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">2</div><div class="flow-b">右折</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">3</div><div class="flow-b">入庫レーン進入 → 駐車</div></div>
+        </div>
+      </div>
+
+      <div class="p-card">
+        <div class="p-title">🚗 出庫フロー <span class="p-badge pb-g">出庫</span></div>
+        <div class="flow">
+          <div class="flow-row"><div class="flow-n">1</div><div class="flow-b">出庫 → 料金所で精算</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">2</div><div class="flow-b">または事前精算機で先払い</div></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row"><div class="flow-n">3</div><div class="flow-b">出庫完了</div></div>
+        </div>
+        <div class="info" style="margin-top:10px">事前精算機は積極的に案内すること。出庫ラッシュ時の渋滞緩和になる。</div>
+      </div>
+
+      <div class="p-card">
+        <div class="p-title">🔀 混雑時 2レーン運用 <span class="p-badge pb-r">混雑</span></div>
+        <div class="warn">満車になったら即座に2号ゲートへ無線報告すること。</div>
+        <div class="row"><div class="rl">切替タイミング</div><div class="rb">料金所1箇所では捌けなくなった時点で即座に2レーン展開</div></div>
+        <div class="row"><div class="rl">誘導方法</div><div class="rb">入庫導線の分岐ポイントから左右に車両を振り分ける</div></div>
+        <div class="row"><div class="rl">渋滞対策</div><div class="rb">料金所に近いブロックから渋滞開始 → 入口封鎖して大回りルートへ誘導</div></div>
+      </div>
+    </div>
+
+    <!-- 案内文言パネル -->
+    <div class="panel" id="panel-phrase">
+      <div class="p-card">
+        <div class="p-title">💬 標準案内文言 6種 <span class="p-badge pb-b">PHRASE</span></div>
+        <div class="info">以下の文言を状況に応じて使用する。お客様に丁寧に伝えること。</div>
+
+        <div class="row">
+          <div class="rl">① エントランス</div>
+          <div class="rb">「エントランスは、中央のガラス扉の所に在ります。」</div>
+        </div>
+        <div class="row">
+          <div class="rl">② 身障者満車</div>
+          <div class="rb">「身障者枠には、限りがあるので満車の場合は出来るだけエントランスに近い箇所を、ご自身でお探しになり駐車して下さい。」</div>
+        </div>
+        <div class="row">
+          <div class="rl">③ 身障者割引</div>
+          <div class="rb">「身障者割引に関しては、エントランスを入られた管理室前に専用の機械が在りますので、そちらで対応願います。」</div>
+        </div>
+        <div class="row">
+          <div class="rl">④ 料金案内</div>
+          <div class="rb">「出口での料金徴収になります。」</div>
+        </div>
+        <div class="row">
+          <div class="rl">⑤ 出庫ラッシュ</div>
+          <div class="rb">「出庫ラッシュ時は、各列の最後尾へ　お並び下さい。」</div>
+        </div>
+        <div class="row">
+          <div class="rl">⑥ 事前精算機</div>
+          <div class="rb">「事前精算機もご用意しておりますので、宜しければご利用下さい。」</div>
+        </div>
+      </div>
+
+      <button class="pdf-btn" onclick="printPhrases()">
+        <span class="pb-icon">🖨️</span> 案内文言集をPDFで出力する
+      </button>
+    </div>
+
+    <!-- 緊急連絡先パネル -->
+    <div class="panel" id="panel-contact">
+      <div class="p-card">
+        <div class="p-title">📻 無線報告先 <span class="p-badge pb-r">URGENT</span></div>
+        <div class="warn">緊急時・満車時は即座に2号ゲートへ無線報告すること。</div>
+        <div class="row"><div class="rl">満車時</div><div class="rb">2号ゲートへ無線報告</div></div>
+        <div class="row"><div class="rl">身障者枠満車</div><div class="rb">2号ゲートへ無線報告 → 空きが出たら再報告</div></div>
+        <div class="row"><div class="rl">問い合わせ応答</div><div class="rb">「駐車枠に空きが出来たらお知らせします」</div></div>
+      </div>
+
+      <div class="p-card">
+        <div class="p-title">📞 緊急連絡先 <span class="p-badge pb-r">緊急</span></div>
+        <div class="row"><div class="rl">管理責任者</div><div class="rb">中島誠一（株式会社イーフロ）</div></div>
+        <div class="row"><div class="rl">消防・救急</div><div class="rb">119</div></div>
+        <div class="row"><div class="rl">警察</div><div class="rb">110</div></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+/* ════ マニュアルデータ ════ */
+const MANUAL = `
+【インテックス大阪 駐車場警備 専用マニュアル】
+エリア：屋上駐車場・第一駐車場・P4臨時駐車場（3エリア）
+料金所：通常1箇所・混雑時2箇所（2レーン）
+特殊設備：事前精算機あり
+
+【絶対厳守事項】
+・料金所・ポール内の横断は絶対禁止。センサーがある為、ポールに当たると破損の恐れがある。
+・ポジション移動・休憩時は必ず料金所の裏側を回ること。
+
+【屋上駐車場 車両フロー】
+入庫：スロープ登坂→右折→入庫レーン進入→駐車
+出庫：出庫→料金所で精算→出庫完了
+事前精算機：積極的に案内する（出庫ラッシュ緩和のため）
+
+【カラーコーン調整（入庫時）】
+①エントランスに近いブロックから駐車枠は埋まっていく
+②満車のブロック入り口をカラーコーンで仮・封鎖する（残り枠が少なくても随時）
+③封鎖しないと出口に車両が多数回り込み、案内・誘導の妨げになる
+
+【カラーコーン調整（出庫時）】
+①入庫導線の分岐ポイントから左右に出庫車両を分けて流す
+②全体の流れを2箇所の料金所に分岐させてスムーズに捌く
+③料金所に近いブロックから渋滞が始まりやすい→ブロック入り口を封鎖して大回りルートへ誘導
+
+【身障者スペース運用】
+①通常はカラーコーンで駐車不可状態にしておく
+②身障者の方から申請があった後にコーンを外し駐車案内
+③満車になったら2号ゲートに無線で報告（バーゲン系は即座に埋まる）
+④2号ゲートから問い合わせ無線→「駐車枠に空きが出来たらお知らせします」と応答
+⑤空きが出来たら即座に2号ゲートへ無線報告
+
+【標準案内文言（6種）】
+①「エントランスは、中央のガラス扉の所に在ります。」
+②「身障者枠には、限りがあるので満車の場合は出来るだけエントランスに近い箇所を、ご自身でお探しになり駐車して下さい。」
+③「身障者割引に関しては、エントランスを入られた管理室前に専用の機械が在りますので、そちらで対応願います。」
+④「出口での料金徴収になります。」
+⑤「出庫ラッシュ時は、各列の最後尾へ　お並び下さい。」
+⑥「事前精算機もご用意しておりますので、宜しければご利用下さい。」
+
+【P4臨時駐車場】
+・メイン駐車場満車時に開放するオーバーフロー対応
+・出入口1箇所（料金所あり）。入庫はUターン動線
+・歩行者通路：左側（西側）に独立
+
+【緊急対応・無線報告】
+・満車時：即座に2号ゲートへ無線報告
+・身障者枠満車：2号ゲートへ報告 → 空きが出たら再報告
+・問い合わせ応答：「駐車枠に空きが出来たらお知らせします」
+`;
+
+/* ════ チャット ════ */
+let history = [];
+let busy = false;
+
+function addMsg(role, html) {
+  const wrap = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const av = document.createElement('div');
+  av.className = `msg-av av-${role}`;
+  av.textContent = role === 'ai' ? '🅿️' : '👤';
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+  body.innerHTML = html;
+  if (role === 'ai') { div.appendChild(av); div.appendChild(body); }
+  else { div.appendChild(body); div.appendChild(av); }
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  return body;
+}
+
+function addTyping() {
+  const wrap = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = 'typing-msg';
+  const av = document.createElement('div');
+  av.className = 'msg-av av-ai'; av.textContent = '🅿️';
+  const body = document.createElement('div');
+  body.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  div.appendChild(av); div.appendChild(body);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-msg');
+  if (el) el.remove();
+}
+
+function fmtAI(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^#{1,3}\s(.+)$/gm, '<h4>$1</h4>')
+    .replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s(.+)$/gm, (_, t) => `<div class="step"><div class="step-n">${_.charAt(0)}</div><div class="step-b">${t}</div></div>`)
+    .replace(/^[・•]\s(.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    .replace(/⚠️(.+)/g, '<div class="alert">⚠️$1</div>')
+    .replace(/※(.+)/g, '<div class="note">※$1</div>')
+    .replace(/【参照マニュアル[：:](.+)】/g, '<div class="ref">📄 参照：$1</div>')
+    .replace(/\n{2,}/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+async function sendMsg() {
+  if (busy) return;
+  const inp = document.getElementById('msg-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; inp.style.height = 'auto';
+  updateCount();
+  showPanel('chat');
+  addMsg('user', text.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+  history.push({ role: 'user', content: text });
+  busy = true;
+  document.getElementById('send-btn').disabled = true;
+  addTyping();
+
+  const sys = `あなたはインテックス大阪の駐車場警備専門AIです。以下のマニュアルのみを参照して回答してください。
+不明な点は「管理責任者（中島誠一）に確認してください」と伝えてください。
+回答は簡潔で実用的に。手順がある場合は①②③の番号付きで。重要な注意は⚠️で始める。
+
+${MANUAL}`;
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: sys,
+        messages: history
+      })
+    });
+    if (!res.ok) throw new Error(`${res.status}`);
+    const d = await res.json();
+    const reply = d.content?.[0]?.text || '';
+    removeTyping();
+    addMsg('ai', fmtAI(reply));
+    history.push({ role: 'assistant', content: reply });
+  } catch (e) {
+    removeTyping();
+    let msg = '⚠️ 通信エラーが発生しました。ネットワーク接続を確認して再度お試しください。';
+    if (e.message.includes('401') || e.message.includes('403')) {
+      msg = '⚠️ 認証エラー。管理者（中島誠一）にご連絡ください。';
+    }
+    addMsg('ai', msg);
+  }
+  busy = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+function quickSend(text) {
+  document.getElementById('msg-input').value = text;
+  sendMsg();
+}
+
+/* ════ UI ════ */
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function updateCount() {
+  const v = document.getElementById('msg-input').value.length;
+  document.getElementById('char-count').textContent = `${v} / 500`;
+}
+
+document.getElementById('msg-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  document.getElementById(`panel-${id}`).classList.add('active');
+  const nav = document.getElementById(`nav-${id}`);
+  if (nav) nav.classList.add('active');
+}
+
+/* ════ PDF出力 ════ */
+function printManual() {
+  showPanel('manual');
+  setTimeout(() => window.print(), 300);
+}
+
+function printPhrases() {
+  showPanel('phrase');
+  setTimeout(() => window.print(), 300);
+}
+</script>
+</body>
+</html>
