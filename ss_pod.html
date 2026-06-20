@@ -211,6 +211,58 @@ html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--ink);-w
   .pdf-btn{display:none!important}
   body{background:#fff}
 }
+
+/* ── 音声入力 ── */
+.mic-btn{
+  width:42px;height:42px;border-radius:50%;border:none;
+  background:var(--bg3);color:var(--ink2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;transition:all .2s;flex-shrink:0;
+  border:1.5px solid var(--border2);
+}
+.mic-btn:hover{background:var(--navy-bg);border-color:var(--navy);color:var(--navy)}
+.mic-btn.listening{
+  background:var(--red-bg);border-color:var(--red);color:var(--red);
+  animation:mic-pulse 1s ease-in-out infinite;
+}
+@keyframes mic-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.voice-indicator{
+  font-size:11px;color:var(--red);font-family:var(--mono);
+  padding:3px 10px;background:var(--red-bg);border:1px solid var(--red-bd);
+  border-radius:12px;display:none;align-items:center;gap:5px;white-space:nowrap;
+}
+.voice-indicator.show{display:flex}
+.vi-dot{width:6px;height:6px;border-radius:50%;background:var(--red);
+  animation:vi 1s ease-in-out infinite}
+@keyframes vi{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── 学習・メモパネル ── */
+.learn-section{padding:10px 12px;border-top:1px solid var(--border);background:var(--bg)}
+.learn-title{font-size:10px;font-family:var(--mono);color:var(--ink4);
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.learn-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
+.learn-item{display:flex;align-items:flex-start;gap:6px;padding:6px 8px;
+  background:#fff;border:1px solid var(--border);border-radius:6px;font-size:11px}
+.li-tag{font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px;
+  font-weight:700;flex-shrink:0;margin-top:1px}
+.li-memo{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bd)}
+.li-rule{background:var(--navy-bg);color:var(--navy);border:1px solid var(--navy-bd)}
+.li-text{flex:1;color:var(--ink2);line-height:1.4}
+.li-del{flex-shrink:0;background:none;border:none;cursor:pointer;
+  color:var(--ink4);font-size:14px;line-height:1;padding:0 2px}
+.li-del:hover{color:var(--red)}
+.learn-input-row{display:flex;gap:6px;margin-top:8px}
+.learn-inp{flex:1;padding:6px 10px;font-size:12px;font-family:var(--font);
+  border:1px solid var(--border2);border-radius:6px;background:#fff;outline:none;
+  color:var(--ink)}
+.learn-inp:focus{border-color:var(--navy)}
+.learn-add-btn{padding:5px 12px;background:var(--navy2);color:#fff;
+  border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;
+  font-family:var(--font);white-space:nowrap;transition:background .15s}
+.learn-add-btn:hover{background:var(--navy)}
+.learn-empty{font-size:11px;color:var(--ink4);text-align:center;padding:10px 0;font-style:italic}
+.speech-unsupported{font-size:11px;color:var(--ink4);display:none}
+
 </style>
 </head>
 <body>
@@ -269,6 +321,12 @@ html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--ink);-w
         <div class="sl">連絡先・PHS<div class="ss">岡本所長・総務部</div></div>
       </div>
       <div class="sb-divider"></div>
+      <div class="sb-section">学習・メモ</div>
+      <div class="sb-item" id="nav-learn" onclick="showPanel('learn')">
+        <span class="si">🧠</span>
+        <div class="sl">学習メモ<div class="ss">覚えたことを保存</div></div>
+      </div>
+      <div class="sb-divider"></div>
       <div class="sb-section">出力</div>
       <div class="sb-item" onclick="printAll()">
         <span class="si">🖨️</span>
@@ -293,13 +351,23 @@ html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--ink);-w
         </div>
       </div>
       <div class="input-area">
-        <div class="input-wrap">
-          <textarea id="msg-input" rows="1"
-            placeholder="業務について質問してください（例：開館手順の⑫番を教えて）"
-            oninput="autoResize(this);updateCount()"></textarea>
-          <div class="input-count" id="char-count">0 / 500</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="voice-indicator" id="voice-indicator">
+              <div class="vi-dot"></div>聴いています…
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <div class="input-wrap" style="flex:1">
+              <textarea id="msg-input" rows="1"
+                placeholder="質問を入力 または 🎤 で音声入力"
+                oninput="autoResize(this);updateCount()"></textarea>
+              <div class="input-count" id="char-count">0 / 500</div>
+            </div>
+            <button class="mic-btn" id="mic-btn" onclick="toggleVoice()" title="音声入力">🎤</button>
+            <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
+          </div>
         </div>
-        <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
       </div>
     </div>
 
@@ -487,6 +555,32 @@ html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--ink);-w
       </button>
     </div>
 
+
+    <!-- 学習メモパネル -->
+    <div class="panel" id="panel-learn">
+      <div class="p-card">
+        <div class="p-title">🧠 学習メモ — 覚えたこと・重要ルール<span class="p-badge pb-n">MEMORY</span></div>
+        <div class="info" style="margin-bottom:10px">チャットで「これを覚えて」「重要ルール：〇〇」と伝えると自動保存されます。手動で追加することもできます。</div>
+        <div id="learn-list" class="learn-list">
+          <div class="learn-empty" id="learn-empty">まだメモがありません</div>
+        </div>
+        <div class="learn-input-row">
+          <input class="learn-inp" id="learn-input" placeholder="メモを追加（例：18:15の自動ドア施錠は順番厳守）" maxlength="200">
+          <button class="learn-add-btn" onclick="addLearnItem('memo',document.getElementById('learn-input').value)">追加</button>
+        </div>
+      </div>
+      <div class="p-card">
+        <div class="p-title">💬 会話サマリー<span class="p-badge pb-y">SUMMARY</span></div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:8px">今日のチャット履歴から重要な内容を自動抽出します。</div>
+        <div id="chat-summary" style="font-size:12px;color:var(--ink2);line-height:1.6;background:var(--bg);border-radius:var(--r);padding:10px;min-height:60px">
+          チャットを行うと、ここに会話の要点が表示されます。
+        </div>
+        <button class="pdf-btn" onclick="generateSummary()" style="margin-top:8px;background:var(--gold2)">
+          <span class="pb-icon">🔍</span> 今日の会話を分析・要約する
+        </button>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
 
@@ -626,6 +720,7 @@ async function sendMsg() {
   showPanel('chat');
   addMsg('user', text.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
   history.push({ role: 'user', content: text });
+  autoDetectLearn(text);
   busy = true;
   document.getElementById('send-btn').disabled = true;
   addTyping();
@@ -635,14 +730,14 @@ async function sendMsg() {
 回答は簡潔で実用的に。手順がある場合は①②③の番号付きで。重要な注意は⚠️で始める。
 【特に重要】自動ドアの操作順番（開館：鍵解錠→ブレーカーON / 閉館：ブレーカーOFF→施錠）は必ず強調すること。
 
-${MANUAL}`;
+${MANUAL}${getLearnContext()}`;
 
   try {
     const res = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 1024,
         system: sys,
         messages: history
@@ -696,6 +791,184 @@ function printAll() {
   showPanel('open');
   setTimeout(() => window.print(), 300);
 }
+
+/* ════ 音声入力 ════ */
+let recognition = null;
+let isListening = false;
+
+(function initSpeech() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('mic-btn').title = '音声入力はこのブラウザでは使用できません';
+    document.getElementById('mic-btn').style.opacity = '0.3';
+    document.getElementById('mic-btn').onclick = () =>
+      alert('音声入力はChromeブラウザでご使用ください。');
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.lang = 'ja-JP';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById('mic-btn').classList.add('listening');
+    document.getElementById('voice-indicator').classList.add('show');
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const inp = document.getElementById('msg-input');
+    inp.value = final || interim;
+    autoResize(inp);
+    updateCount();
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    document.getElementById('mic-btn').classList.remove('listening');
+    document.getElementById('voice-indicator').classList.remove('show');
+    const val = document.getElementById('msg-input').value.trim();
+    if (val) setTimeout(() => sendMsg(), 400);
+  };
+
+  recognition.onerror = (e) => {
+    isListening = false;
+    document.getElementById('mic-btn').classList.remove('listening');
+    document.getElementById('voice-indicator').classList.remove('show');
+    if (e.error !== 'no-speech') console.warn('音声エラー:', e.error);
+  };
+})();
+
+function toggleVoice() {
+  if (!recognition) return;
+  if (isListening) { recognition.stop(); return; }
+  document.getElementById('msg-input').value = '';
+  try { recognition.start(); } catch(e) { console.warn(e); }
+}
+
+/* ════ 学習・メモ機能 ════ */
+const STORAGE_KEY = 'eflo_learn_ss';
+
+function getLearnItems() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveLearnItems(items) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch(e) {}
+}
+
+function renderLearnItems() {
+  const items = getLearnItems();
+  const list = document.getElementById('learn-list');
+  const empty = document.getElementById('learn-empty');
+  if (items.length === 0) {
+    list.innerHTML = '<div class="learn-empty" id="learn-empty">まだメモがありません</div>';
+    return;
+  }
+  list.innerHTML = items.map((item, i) => `
+    <div class="learn-item">
+      <span class="li-tag ${item.type === 'rule' ? 'li-rule' : 'li-memo'}">${item.type === 'rule' ? 'ルール' : 'メモ'}</span>
+      <span class="li-text">${escLearn(item.text)}</span>
+      <button class="li-del" onclick="deleteLearnItem(${i})" title="削除">✕</button>
+    </div>`).join('');
+}
+
+function addLearnItem(type, text) {
+  text = text?.trim();
+  if (!text) return;
+  const items = getLearnItems();
+  // 重複チェック
+  if (items.some(i => i.text === text)) {
+    document.getElementById('learn-input').value = '';
+    return;
+  }
+  items.unshift({ type, text, ts: Date.now() });
+  if (items.length > 50) items.pop(); // 最大50件
+  saveLearnItems(items);
+  renderLearnItems();
+  document.getElementById('learn-input').value = '';
+}
+
+function deleteLearnItem(idx) {
+  const items = getLearnItems();
+  items.splice(idx, 1);
+  saveLearnItems(items);
+  renderLearnItems();
+}
+
+function escLearn(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// チャットメッセージから学習ワードを自動検出
+function autoDetectLearn(userText) {
+  const patterns = [
+    { re: /これを覚えて[：:、]?(.+)/,     type: 'memo' },
+    { re: /覚えておいて[：:、]?(.+)/,     type: 'memo' },
+    { re: /重要ルール[：:](.+)/,          type: 'rule' },
+    { re: /必ず覚えて[：:、]?(.+)/,       type: 'rule' },
+    { re: /ポイント[：:](.+)/,            type: 'memo' },
+    { re: /注意[：:](.+)/,               type: 'rule' },
+  ];
+  for (const p of patterns) {
+    const m = userText.match(p.re);
+    if (m && m[1].trim()) {
+      addLearnItem(p.type, m[1].trim());
+      return true;
+    }
+  }
+  return false;
+}
+
+// 会話サマリー生成
+async function generateSummary() {
+  if (history.length === 0) {
+    document.getElementById('chat-summary').textContent = 'まだ会話がありません。チャットを行ってから実行してください。';
+    return;
+  }
+  document.getElementById('chat-summary').textContent = '要約を生成中...';
+  const msgs = history.slice(-10).map(m => `${m.role === 'user' ? '隊員' : 'AI'}: ${m.content}`).join('\n');
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: `以下の会話から重要なポイントを3〜5点、箇条書きで日本語で要約してください。\n\n${msgs}`
+        }]
+      })
+    });
+    const d = await res.json();
+    const summary = d.content?.[0]?.text || '要約できませんでした。';
+    document.getElementById('chat-summary').innerHTML =
+      summary.replace(/^[・•\-]\s/gm, '• ').replace(/\n/g, '<br>');
+  } catch(e) {
+    document.getElementById('chat-summary').textContent = 'エラーが発生しました。もう一度お試しください。';
+  }
+}
+
+// 学習メモをシステムプロンプトに追加する関数
+function getLearnContext() {
+  const items = getLearnItems();
+  if (items.length === 0) return '';
+  return '\n\n【隊員が覚えたメモ・重要ルール】\n' +
+    items.map(i => `・${i.text}`).join('\n');
+}
+
+// 初期化
+renderLearnItems();
+
 </script>
 </body>
 </html>
