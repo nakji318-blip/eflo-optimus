@@ -444,6 +444,9 @@ html,body{min-height:100vh;background:var(--paper);color:var(--ink);font-family:
     <div class="pill" id="pill-4" onclick="goStep(4)">
       <div class="pill-n"><span class="pill-ni">5</span></div>連絡先
     </div>
+    <div class="pill" id="pill-5" onclick="goStep(5)">
+      <div class="pill-n"><span class="pill-ni">6</span></div>質問・メモ
+    </div>
   </div>
 
   <div class="content">
@@ -537,6 +540,55 @@ html,body{min-height:100vh;background:var(--paper);color:var(--ink);font-family:
       </div>
       <div class="act-row">
         <button class="btn" onclick="goStep(3)">← Q&A</button>
+        <button class="btn btn-t" onclick="goStep(5)">次へ：質問・メモ →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Free Q&A + Voice + Memory -->
+    <div class="sec" id="sec-5">
+      <div class="card">
+        <div class="c-head">
+          <div class="c-title">自由質問チャット</div>
+          <div class="tag tag-b">🎤 音声対応</div>
+        </div>
+        <div id="freechat-msgs" style="display:flex;flex-direction:column;gap:8px;min-height:60px;margin-bottom:12px"></div>
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+            <div class="voice-badge-os" id="voice-badge-os" style="display:none;font-size:11px;color:var(--red);font-weight:500">🔴 聴いています…</div>
+            <textarea id="free-input" rows="1" placeholder="現場について質問（音声入力も可）"
+              style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--r);
+                     background:var(--paper);font-family:var(--font-body);font-size:13px;resize:none;outline:none"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFree();}"></textarea>
+          </div>
+          <button id="mic-btn-os" onclick="toggleVoiceOS()" title="音声入力"
+            style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border2);
+                   background:var(--paper);font-size:18px;cursor:pointer;flex-shrink:0;transition:all .2s">🎤</button>
+          <button onclick="sendFree()"
+            style="width:42px;height:42px;border-radius:50%;border:none;background:var(--red2);
+                   color:#fff;font-size:18px;cursor:pointer;flex-shrink:0">↑</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="c-head">
+          <div class="c-title">🧠 学習メモ</div>
+          <div class="tag tag-g" id="memo-count-badge">0件</div>
+        </div>
+        <div style="font-size:11px;color:var(--ink3);margin-bottom:10px;line-height:1.6">
+          チャットで「これを覚えて：〇〇」「重要ルール：〇〇」と伝えると自動保存されます。手動でも追加できます。
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:12px">
+          <input id="memo-input" type="text" placeholder="メモを直接追加..."
+            style="flex:1;padding:8px 10px;border:1.5px solid var(--border2);border-radius:var(--r);
+                   font-family:var(--font-body);font-size:12px;outline:none"
+            onkeydown="if(event.key==='Enter'){addMemoManual();}">
+          <button onclick="addMemoManual()" class="btn" style="flex:0 0 auto;padding:8px 16px">追加</button>
+        </div>
+        <div id="memo-list"></div>
+      </div>
+
+      <div class="act-row">
+        <button class="btn" onclick="goStep(4)">← 連絡先</button>
         <button class="btn btn-t" onclick="complete()">学習完了 ✓</button>
       </div>
     </div>
@@ -975,7 +1027,7 @@ function goStep(step){
 }
 
 function updateProg(){
-  const pct=Math.round(doneSteps.size/5*100);
+  const pct=Math.round(doneSteps.size/6*100);
   document.getElementById('top-prog').textContent=pct+'%';
 }
 
@@ -998,6 +1050,206 @@ function restart(){
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 /* ════ DEMO DATA (P4 v2.0) ════ */
+
+/* ════════════════════════════════════
+   音声入力（Web Speech API）
+════════════════════════════════════ */
+let recognitionOS = null;
+let isListeningOS = false;
+
+(function initSpeechOS() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    const mb = document.getElementById('mic-btn-os');
+    if (mb) { mb.style.opacity = '0.3'; mb.onclick = () => alert('音声入力はChromeブラウザでご使用ください。'); }
+    return;
+  }
+  recognitionOS = new SR();
+  recognitionOS.lang = 'ja-JP';
+  recognitionOS.continuous = false;
+  recognitionOS.interimResults = true;
+  recognitionOS.onstart = () => {
+    isListeningOS = true;
+    const mb = document.getElementById('mic-btn-os');
+    const vb = document.getElementById('voice-badge-os');
+    if (mb) { mb.style.background = 'var(--red)'; mb.style.color = '#fff'; mb.style.borderColor = 'var(--red)'; }
+    if (vb) vb.style.display = 'block';
+  };
+  recognitionOS.onresult = (e) => {
+    let final = '', interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const inp = document.getElementById('free-input');
+    if (inp) inp.value = final || interim;
+  };
+  recognitionOS.onend = () => {
+    isListeningOS = false;
+    const mb = document.getElementById('mic-btn-os');
+    const vb = document.getElementById('voice-badge-os');
+    if (mb) { mb.style.background = 'var(--paper)'; mb.style.color = ''; mb.style.borderColor = 'var(--border2)'; }
+    if (vb) vb.style.display = 'none';
+    const val = document.getElementById('free-input')?.value.trim();
+    if (val) setTimeout(() => sendFree(), 300);
+  };
+  recognitionOS.onerror = () => {
+    isListeningOS = false;
+    const mb = document.getElementById('mic-btn-os');
+    const vb = document.getElementById('voice-badge-os');
+    if (mb) { mb.style.background = 'var(--paper)'; mb.style.color = ''; mb.style.borderColor = 'var(--border2)'; }
+    if (vb) vb.style.display = 'none';
+  };
+})();
+
+function toggleVoiceOS() {
+  if (!recognitionOS) return;
+  if (isListeningOS) { recognitionOS.stop(); return; }
+  document.getElementById('free-input').value = '';
+  try { recognitionOS.start(); } catch(e) {}
+}
+
+/* ════════════════════════════════════
+   自由質問チャット（音声入力連携）
+════════════════════════════════════ */
+let freeHistory = [];
+
+function addFreeMsg(role, text) {
+  const wrap = document.getElementById('freechat-msgs');
+  const div = document.createElement('div');
+  div.style.cssText = role === 'user'
+    ? 'align-self:flex-end;max-width:85%;background:var(--red2);color:#fff;padding:9px 13px;border-radius:12px;border-bottom-right-radius:4px;font-size:13px;line-height:1.5'
+    : 'align-self:flex-start;max-width:90%;background:var(--paper2);border:1px solid var(--border);padding:9px 13px;border-radius:12px;border-bottom-left-radius:4px;font-size:13px;line-height:1.6';
+  div.innerHTML = esc(text).replace(/\n/g,'<br>');
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+async function sendFree() {
+  const inp = document.getElementById('free-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  addFreeMsg('user', text);
+  freeHistory.push({ role: 'user', content: text });
+
+  // 学習メモの自動検出
+  autoDetectMemo(text);
+
+  const loading = document.createElement('div');
+  loading.id = 'free-loading';
+  loading.style.cssText = 'align-self:flex-start;color:var(--ink3);font-size:12px;padding:6px 0';
+  loading.textContent = '考え中...';
+  document.getElementById('freechat-msgs').appendChild(loading);
+
+  const si = SITES[user.site] || SITES['p4'];
+  const memoContext = getMemoContext();
+  const sysPrompt = `あなたはイーフロ警備会社の現場サポートAIです。配属現場「${si.name}」のマニュアルを参照して、隊員の質問に答えてください。
+不明な点は「管理責任者（中島誠一）に確認してください」と伝えてください。簡潔に、手順は①②③形式で。
+
+【現場マニュアル】
+${si.manual}
+${memoContext}`;
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        system: sysPrompt,
+        messages: freeHistory
+      })
+    });
+    document.getElementById('free-loading')?.remove();
+    if (!res.ok) throw new Error(`${res.status}`);
+    const d = await res.json();
+    const reply = d.content?.[0]?.text || '回答を取得できませんでした。';
+    addFreeMsg('ai', reply);
+    freeHistory.push({ role: 'assistant', content: reply });
+  } catch (e) {
+    document.getElementById('free-loading')?.remove();
+    addFreeMsg('ai', '⚠️ 通信エラーが発生しました。ネットワーク接続を確認して再度お試しください。');
+  }
+}
+
+/* ════════════════════════════════════
+   学習メモ（localStorage永続化）
+════════════════════════════════════ */
+const MEMO_KEY = 'eflo_school_memo';
+
+function getMemos() {
+  try { const r = localStorage.getItem(MEMO_KEY); return r ? JSON.parse(r) : []; }
+  catch { return []; }
+}
+function saveMemos(items) {
+  try { localStorage.setItem(MEMO_KEY, JSON.stringify(items)); } catch {}
+}
+function renderMemos() {
+  const items = getMemos();
+  const list = document.getElementById('memo-list');
+  const badge = document.getElementById('memo-count-badge');
+  if (badge) badge.textContent = `${items.length}件`;
+  if (!list) return;
+  if (!items.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--ink4);padding:10px 0;text-align:center">まだメモがありません</div>';
+    return;
+  }
+  list.innerHTML = items.map((item, i) => `
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0;margin-top:1px;
+        background:${item.type==='rule'?'var(--red-bg)':'var(--teal-bg)'};
+        color:${item.type==='rule'?'var(--red)':'var(--teal)'};
+        border:1px solid ${item.type==='rule'?'var(--red-border)':'var(--teal-border)'}">
+        ${item.type==='rule'?'RULE':'MEMO'}
+      </span>
+      <span style="flex:1;font-size:12px;color:var(--ink);line-height:1.5">${esc(item.text)}</span>
+      <button onclick="delMemo(${i})" style="border:none;background:none;color:var(--ink4);cursor:pointer;font-size:13px;flex-shrink:0">✕</button>
+    </div>`).join('');
+}
+function addMemo(type, text) {
+  text = text?.trim(); if (!text) return;
+  const items = getMemos();
+  if (items.some(i => i.text === text)) return;
+  items.unshift({ type, text, ts: Date.now(), site: user.site, name: user.name });
+  if (items.length > 50) items.pop();
+  saveMemos(items);
+  renderMemos();
+}
+function addMemoManual() {
+  const inp = document.getElementById('memo-input');
+  const text = inp.value.trim(); if (!text) return;
+  addMemo('memo', text);
+  inp.value = '';
+}
+function delMemo(idx) {
+  const items = getMemos(); items.splice(idx, 1);
+  saveMemos(items); renderMemos();
+}
+function autoDetectMemo(text) {
+  const patterns = [
+    { re: /これを覚えて[：:、]?(.+)/,  type: 'memo' },
+    { re: /覚えておいて[：:、]?(.+)/, type: 'memo' },
+    { re: /重要ルール[：:](.+)/,       type: 'rule' },
+    { re: /必ず覚えて[：:、]?(.+)/,   type: 'rule' },
+    { re: /ポイント[：:](.+)/,         type: 'memo' },
+    { re: /注意[：:](.+)/,            type: 'rule' },
+  ];
+  for (const p of patterns) {
+    const m = text.match(p.re);
+    if (m && m[1].trim()) { addMemo(p.type, m[1].trim()); return true; }
+  }
+  return false;
+}
+function getMemoContext() {
+  const items = getMemos().filter(i => i.site === user.site);
+  if (!items.length) return '';
+  return '\n\n【この隊員が覚えたメモ・重要ルール】\n' + items.map(i => `・${i.text}`).join('\n');
+}
+
+// 初期表示
+renderMemos();
 
 </script>
 
