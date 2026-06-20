@@ -2,6 +2,12 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<link rel="manifest" href="/manifest_ss.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SS AI">
+<meta name="theme-color" content="#1a2a4a">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>SS AI — 千趣会 防災センター警備支援</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -969,6 +975,16 @@ function getLearnContext() {
 // 初期化
 renderLearnItems();
 
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW登録完了:', r.scope))
+      .catch(e => console.log('SW登録失敗:', e));
+  });
+}
 </script>
 </body>
 </html>
